@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { ProductShell } from '@/components/shell/product-shell'
@@ -124,46 +125,53 @@ export function AgronautasAuthPage({ client, destination = '/agronautas' }: Agro
   }
 
   return (
-    <ProductShell product="agronautas" title="Iniciar sesión" headerVariant="landing" description="Entrá a tu cuenta para gestionar tu campo y tus consultas." navItems={DEMO_WORKSPACE_VIEWS.map((view) => ({ href: buildWorkspaceHref(view.key, null, '/demo'), label: view.label }))}>
-      <section className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr,0.8fr]" aria-label="Autenticación Agronautas">
-        <div className="rounded-[2rem] bg-stone-950 p-6 text-white shadow-lg sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Sesión server-managed</p>
-          <h2 className="mt-3 font-serif text-3xl font-semibold">Entrá a tu workspace</h2>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-stone-300">El navegador recibe sólo el estado público de la sesión. Los tokens de acceso y refresh permanecen en cookies HttpOnly del BFF.</p>
-          {pageState === AUTH_PAGE_STATES.LOADING ? <p className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm" role="status">Verificando si existe una sesión…</p> : null}
-          {pageState === AUTH_PAGE_STATES.AUTHENTICATED && session ? <AuthenticatedState destination={destination} session={session} pending={pending} onRefresh={() => void refresh()} onLogout={() => void logout()} /> : null}
-          {pageState === AUTH_PAGE_STATES.SIGNED_OUT || pageState === AUTH_PAGE_STATES.ERROR ? <SignInForm email={email} password={password} remaining={remaining} pending={pending} onEmailChange={setEmail} onPasswordChange={setPassword} onSubmit={signIn} outcome={outcome} onRecovery={() => { setOutcome(null); setPageState(AUTH_PAGE_STATES.SIGNED_OUT) }} /> : null}
+    <ProductShell product="agronautas" title="Iniciar sesión" headerVariant="landing" fullBleed headerOverlay navItems={DEMO_WORKSPACE_VIEWS.map((view) => ({ href: buildWorkspaceHref(view.key, null, '/demo'), label: view.label }))}>
+      <section className="relative isolate min-h-svh bg-emerald-950" aria-label="Autenticación Agronautas">
+        <img src="/login/login-hero.png" alt="Dos productores recorren un cultivo al atardecer con una tablet" fetchPriority="high" className="absolute inset-0 -z-20 h-full w-full object-cover object-[62%_center]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-emerald-950/65 via-emerald-950/15 to-transparent" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-emerald-950/75 via-transparent to-black/20" />
+        <div className="mx-auto grid min-h-svh max-w-[90rem] items-center gap-12 px-4 pb-10 pt-28 sm:px-8 sm:pb-16 sm:pt-36 lg:grid-cols-[minmax(0,460px)_1fr] lg:gap-20">
+          <div className="rounded-3xl border border-white/70 bg-white/95 p-6 text-stone-900 shadow-2xl backdrop-blur-md sm:p-10">
+            <a href="/" className="inline-flex min-h-11 items-center gap-2 text-sm text-stone-500 transition hover:text-emerald-800"><ArrowLeft size={16} aria-hidden="true" /> Volver al inicio</a>
+            <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><LockKeyhole size={22} aria-hidden="true" /></div>
+            <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-700">TU CAMPO, CONECTADO</p>
+            <h2 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-stone-950">Qué bueno volver.</h2>
+            <p className="mt-3 text-sm leading-6 text-stone-500">Ingresá a tu cuenta y seguí de cerca lo que pasa en tu campo.</p>
+            {pageState === AUTH_PAGE_STATES.LOADING ? <p className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">Verificando tu sesión…</p> : null}
+            {pageState === AUTH_PAGE_STATES.AUTHENTICATED && session ? <AuthenticatedState destination={destination} session={session} pending={pending} onRefresh={() => void refresh()} onLogout={() => void logout()} /> : null}
+            {pageState === AUTH_PAGE_STATES.SIGNED_OUT || pageState === AUTH_PAGE_STATES.ERROR ? <SignInForm email={email} password={password} remaining={remaining} pending={pending} onEmailChange={setEmail} onPasswordChange={setPassword} onSubmit={signIn} outcome={outcome} onRecovery={() => { setOutcome(null); setPageState(AUTH_PAGE_STATES.SIGNED_OUT) }} /> : null}
+            <div className="mt-7 flex items-center justify-center gap-2 border-t border-stone-200 pt-6 text-xs text-stone-500"><LockKeyhole size={14} aria-hidden="true" /> Un espacio seguro para tu gestión.</div>
+          </div>
+          <div className="max-w-lg self-end pb-2 text-white lg:pb-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-100">Cerca de tu tierra. Siempre.</p>
+            <p className="mt-4 font-serif text-4xl leading-tight tracking-tight sm:text-5xl">El próximo paso de tu campo empieza acá.</p>
+            <p className="mt-5 max-w-sm text-sm leading-6 text-white/85">Tu equipo, tus decisiones y toda la información que necesitás. En un mismo lugar.</p>
+          </div>
         </div>
-        <aside className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-label="Límites de la sesión">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-800">Estado honesto</p>
-          <h2 className="mt-3 font-serif text-2xl font-semibold text-stone-950">Sin acceso, no hay datos</h2>
-          <ul className="mt-5 space-y-4 text-sm leading-6 text-stone-600">
-            <li><strong className="text-stone-950">401</strong> solicita una sesión y no muestra contenido protegido.</li>
-            <li><strong className="text-stone-950">403</strong> mantiene el workspace fuera de alcance para esta membresía.</li>
-            <li><strong className="text-stone-950">409</strong> por replay revoca la familia y requiere volver a iniciar sesión.</li>
-            <li><strong className="text-stone-950">503</strong> conserva la protección durante mantenimiento; no declara disponibilidad.</li>
-          </ul>
-        </aside>
       </section>
     </ProductShell>
   )
 }
 
 function SignInForm({ email, password, remaining, pending, outcome, onEmailChange, onPasswordChange, onSubmit, onRecovery }: { email: string; password: string; remaining: number; pending: boolean; outcome: AgronautasAuthClientErrorOutcome | null; onEmailChange: (value: string) => void; onPasswordChange: (value: string) => void; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onRecovery: () => void }) {
+  const [showPassword, setShowPassword] = useState(false)
   return (
     <form className="mt-8 grid gap-5" onSubmit={onSubmit}>
       {outcome ? <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900" role="alert" aria-live="assertive"><p className="font-semibold">{outcome.title}</p><p className="mt-1">{outcome.description}</p>{outcome.state === 'recovery' ? <button type="button" className="mt-3 font-semibold underline underline-offset-4" onClick={onRecovery}>Volver a iniciar sesión</button> : null}</div> : null}
       <label className="grid gap-2 text-sm font-semibold" htmlFor="agronautas-email">Correo
-        <input id="agronautas-email" name="email" type="email" autoComplete="username" required value={email} onChange={(event) => onEmailChange(event.target.value)} className="min-h-12 rounded-xl border border-stone-300 bg-white px-4 text-stone-950 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-200" />
+        <input id="agronautas-email" name="email" type="email" autoComplete="username" placeholder="nombre@ejemplo.com" disabled={pending} required value={email} onChange={(event) => onEmailChange(event.target.value)} className="min-h-12 w-full rounded-xl border border-stone-300 bg-white px-4 pr-12 text-stone-950 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-200" />
       </label>
       <label className="grid gap-2 text-sm font-semibold" htmlFor="agronautas-password">Contraseña
-        <input id="agronautas-password" name="password" type="password" autoComplete="current-password" required value={password} onChange={(event) => onPasswordChange(event.target.value)} className="min-h-12 rounded-xl border border-stone-300 bg-white px-4 text-stone-950 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-200" />
+        <span className="relative block">
+        <input id="agronautas-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Ingresá tu contraseña" disabled={pending} required value={password} onChange={(event) => onPasswordChange(event.target.value)} className="min-h-12 w-full rounded-xl border border-stone-300 bg-white px-4 pr-12 text-stone-950 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-200" />
+        <button type="button" aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-stone-500 hover:text-emerald-700 focus-visible:outline-emerald-700">{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button>
+        </span>
       </label>
-      <button type="submit" disabled={pending || remaining > 0} className="min-h-12 rounded-xl bg-emerald-500 px-5 font-semibold text-stone-950 transition hover:bg-emerald-400 disabled:cursor-wait disabled:opacity-60">{pending ? 'Verificando…' : remaining > 0 ? `Reintentar en ${remaining} s` : 'Iniciar sesión'}</button>
+      <button type="submit" disabled={pending || remaining > 0} className="flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-700 px-5 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-wait disabled:opacity-60">{pending ? 'Verificando…' : remaining > 0 ? `Reintentar en ${remaining} s` : 'Iniciar sesión'}<ArrowRight size={18} aria-hidden="true" /></button>
     </form>
   )
 }
 
 function AuthenticatedState({ destination, session, pending, onRefresh, onLogout }: { destination: string; session: AgronautasAuthSession | AgronautasAuthStatus; pending: boolean; onRefresh: () => void; onLogout: () => void }) {
-  return <div className="mt-8 rounded-2xl border border-emerald-300/30 bg-emerald-900/50 p-5" role="status"><p className="font-semibold text-emerald-100">Sesión activa</p><p className="mt-2 text-sm text-stone-200">Workspace autorizado: <strong>{session.principal.workspaceKey}</strong></p><p className="mt-1 text-xs text-stone-400">Expira: {new Date(session.principal.expiresAt).toLocaleString('es-AR')}</p><div className="mt-5 flex flex-wrap gap-3"><a href={destination} className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-stone-950">Abrir workspace</a><button type="button" disabled={pending} onClick={onRefresh} className="rounded-xl border border-white/25 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">Actualizar sesión</button><button type="button" disabled={pending} onClick={onLogout} className="rounded-xl border border-rose-300/50 px-4 py-3 text-sm font-semibold text-rose-100 disabled:opacity-60">Cerrar sesión</button></div></div>
+  return <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5" role="status"><p className="font-semibold text-emerald-900">Sesión activa</p><p className="mt-2 text-sm text-stone-600">Espacio de trabajo: <strong>{session.principal.workspaceKey}</strong></p><p className="mt-1 text-xs text-stone-400">Expira: {new Date(session.principal.expiresAt).toLocaleString('es-AR')}</p><div className="mt-5 flex flex-wrap gap-3"><a href={destination} className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-stone-950">Abrir workspace</a><button type="button" disabled={pending} onClick={onRefresh} className="rounded-xl border border-emerald-200 px-4 py-3 text-sm font-semibold text-emerald-800 disabled:opacity-60">Actualizar sesión</button><button type="button" disabled={pending} onClick={onLogout} className="rounded-xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700 disabled:opacity-60">Cerrar sesión</button></div></div>
 }

@@ -5,6 +5,7 @@ import { ArrowUpRight, Droplets, Leaf, MapPin, Plus, Sprout, X } from 'lucide-re
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { CampaignsPanel, CampaignPlanningPanel } from './campaigns-panel'
 import {
   definitions,
   initialData,
@@ -16,11 +17,14 @@ import {
 
 const tabs = [
   ['summary', 'Resumen'],
+  ['campaigns', 'Campañas'],
+  ['tasks', 'Operaciones'],
+  ['stock', 'Insumos'],
+  ['costs', 'Costos'],
+  ['water', 'Monitoreo'],
+  ['harvest', 'Cosecha'],
   ['lots', 'Lotes'],
-  ['tasks', 'Tareas'],
   ['applications', 'Aplicaciones'],
-  ['stock', 'Stock'],
-  ['water', 'Riego y Monitoreo'],
 ] as const
 type Tab = (typeof tabs)[number][0]
 type Modal = { entity: Entity; row?: Row; mode: 'edit' | 'view' | 'delete' | 'in' | 'out' }
@@ -81,7 +85,12 @@ export function AgronomyPanel() {
     'Aplicación registrada · Lote Norte',
     'Riego registrado · Lote Norte',
   ])
-  const entity: Entity = tab === 'water' ? water : tab === 'summary' ? 'lots' : tab
+  const entity: Entity =
+    tab === 'water'
+      ? water
+      : tab === 'summary' || tab === 'campaigns' || tab === 'costs' || tab === 'harvest'
+        ? 'lots'
+        : tab
   const pending = data.tasks.filter((row) => row['status'] !== 'Completada')
   const critical = data.stock.filter((row) => stockStatus(row) !== 'Stock normal')
   const alerts = [
@@ -182,13 +191,13 @@ export function AgronomyPanel() {
       </div>
       <div className="mx-auto max-w-[90rem] space-y-6 px-4 py-6 sm:px-8">
         <p className="text-xs text-stone-500">
-          DEMO · Datos ficticios · Fecha de referencia: 1 de octubre de 2026. Los cambios duran
-          durante esta sesión.
+          DEMO · Datos ficticios · Operaciones al 1 de octubre de 2026; campañas con su propia fecha
+          de seguimiento. Los cambios duran durante esta sesión.
         </p>
         <div
           role="tablist"
           aria-label="Secciones de Gestión Agronómica"
-          className="flex gap-1 overflow-x-auto rounded-2xl border border-stone-200 bg-white p-1.5 shadow-sm"
+          className="flex flex-wrap gap-1 rounded-2xl border border-stone-200 bg-white p-1.5 shadow-sm"
         >
           {tabs.map(([key, label], index) => (
             <button
@@ -234,7 +243,11 @@ export function AgronomyPanel() {
           tabIndex={0}
           className="space-y-6"
         >
-          {tab === 'summary' ? (
+          {tab === 'campaigns' ? (
+            <CampaignsPanel />
+          ) : tab === 'costs' || tab === 'harvest' ? (
+            <CampaignPlanningPanel mode={tab} />
+          ) : tab === 'summary' ? (
             <>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {metrics.map(([label, value, detail], index) => (

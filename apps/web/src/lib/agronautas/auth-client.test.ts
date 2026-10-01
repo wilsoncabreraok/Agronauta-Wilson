@@ -71,3 +71,13 @@ test('Agronautas auth client maps security boundaries to truthful visible states
   assert.equal(normalizeAgronautasAuthClientError(new ApiError(409, 'Replay', undefined, undefined, 'REFRESH_REPLAY')).state, 'recovery')
   assert.equal(normalizeAgronautasAuthClientError(new ApiError(503, 'Maintenance', undefined, undefined, 'AUTH_MAINTENANCE')).state, 'maintenance')
 })
+
+test('connection failures show actionable copy without exposing upstream errors', () => {
+  for (const error of [new ApiError(502, 'Agronautas upstream request failed.'), new ApiError(504, 'Agronautas upstream request timed out.'), new TypeError('Failed to fetch')]) {
+    const outcome = normalizeAgronautasAuthClientError(error)
+    assert.equal(outcome.state, 'unavailable')
+    assert.equal(outcome.preserveDraft, true)
+    assert.match(outcome.description, /volvé a intentar/)
+    assert.doesNotMatch(outcome.description, /upstream|fetch/)
+  }
+})

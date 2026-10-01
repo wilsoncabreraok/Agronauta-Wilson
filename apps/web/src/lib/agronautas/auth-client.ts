@@ -74,7 +74,7 @@ export function normalizeAgronautasAuthClientError(error: unknown): AgronautasAu
     return { state: AUTH_CLIENT_STATES.RATE_LIMITED, title: 'Demasiados intentos', description: `Esperá ${Math.ceil(retryAfterMs / 1000)} segundos antes de volver a intentar. Tus datos siguen en el formulario.`, preserveDraft: true, retryAfterMs }
   }
   if (apiError?.code === 'REFRESH_REPLAY' || apiError?.status === 409) {
-    return { state: AUTH_CLIENT_STATES.RECOVERY, title: 'Sesión revocada por seguridad', description: 'El refresh fue rechazado por replay. Iniciá sesión nuevamente; no se muestran datos protegidos.', preserveDraft: true }
+    return { state: AUTH_CLIENT_STATES.RECOVERY, title: 'Sesión revocada por seguridad', description: 'Tu sesión ya no es válida. Volvé a iniciar sesión para continuar.', preserveDraft: true }
   }
   if (apiError?.status === 401) {
     return { state: AUTH_CLIENT_STATES.UNAUTHORIZED, title: 'Sesión requerida', description: 'Las credenciales no pudieron verificarse. Revisá los datos o iniciá sesión nuevamente.', preserveDraft: true }
@@ -83,9 +83,9 @@ export function normalizeAgronautasAuthClientError(error: unknown): AgronautasAu
     return { state: AUTH_CLIENT_STATES.FORBIDDEN, title: 'Workspace restringido', description: 'Tu membresía no permite este workspace u operación. Consultá al administrador.', preserveDraft: true }
   }
   if (apiError?.code === 'AUTH_MAINTENANCE' || apiError?.status === 503) {
-    return { state: AUTH_CLIENT_STATES.MAINTENANCE, title: 'Autenticación en mantenimiento', description: 'No se pudo probar la política de seguridad. Tus datos permanecen protegidos; intentá más tarde.', preserveDraft: true }
+    return { state: AUTH_CLIENT_STATES.MAINTENANCE, title: 'Autenticación en mantenimiento', description: 'El servicio de acceso está temporalmente en mantenimiento. Intentá nuevamente más tarde.', preserveDraft: true }
   }
-  return { state: AUTH_CLIENT_STATES.UNAVAILABLE, title: 'Acceso no disponible', description: apiError?.message ?? 'No se pudo confirmar el acceso. No se muestran datos no verificados.', preserveDraft: true }
+  return { state: AUTH_CLIENT_STATES.UNAVAILABLE, title: 'Acceso no disponible', description: 'No pudimos conectarnos con el servicio de acceso. Esperá unos instantes y volvé a intentar. Tus datos siguen en el formulario.', preserveDraft: true }
 }
 
 async function request(path: string, init: RequestInit = {}): Promise<unknown> {

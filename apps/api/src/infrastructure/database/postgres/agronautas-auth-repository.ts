@@ -73,8 +73,8 @@ export class PostgresAgronautasAuthRepository implements AuthRepository {
   async createSession(input: { userId: string; membershipId: string; refreshFamilyId: string; expiresAt: Date }): Promise<AuthSessionRecord> {
     const id = randomUUID()
     const result = await this.pool.query(
-      `INSERT INTO agronautas_auth_sessions (id, user_id, membership_id, refresh_family_id, expires_at)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO agronautas_auth_sessions (id, user_id, membership_id, refresh_family_id, expires_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, now())
        RETURNING id, user_id, membership_id, refresh_family_id, expires_at, revoked_at`,
       [id, input.userId, input.membershipId, input.refreshFamilyId, input.expiresAt],
     )
@@ -93,8 +93,8 @@ export class PostgresAgronautasAuthRepository implements AuthRepository {
   async createRefreshToken(input: { sessionId: string; familyId: string; expiresAt: Date }): Promise<AuthRefreshRecord> {
     const id = randomUUID()
     const result = await this.pool.query(
-      `INSERT INTO agronautas_auth_refresh_tokens (id, session_id, family_id, expires_at)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO agronautas_auth_refresh_tokens (id, session_id, family_id, expires_at, updated_at)
+       VALUES ($1, $2, $3, $4, now())
        RETURNING id, session_id, family_id, expires_at, consumed_at, revoked_at`,
       [id, input.sessionId, input.familyId, input.expiresAt],
     )
@@ -156,8 +156,8 @@ export class PostgresAgronautasAuthRepository implements AuthRepository {
       )
       const replacementId = randomUUID()
       const replacement = await client.query(
-        `INSERT INTO agronautas_auth_refresh_tokens (id, session_id, family_id, expires_at)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO agronautas_auth_refresh_tokens (id, session_id, family_id, expires_at, updated_at)
+         VALUES ($1, $2, $3, $4, now())
          RETURNING id, session_id, family_id, expires_at, consumed_at, revoked_at`,
         [replacementId, token.sessionId, token.familyId, boundedReplacementExpiresAt],
       )
@@ -226,26 +226,26 @@ export class PostgresAgronautasAuthRepository implements AuthRepository {
         }
       }
       await client.query(
-        `INSERT INTO "agronautas_workspaces" ("id", "name", "status") VALUES ($1, $2, 'active')
-         ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name"`,
+        `INSERT INTO "agronautas_workspaces" ("id", "name", "status", "updated_at") VALUES ($1, $2, 'active', now())
+         ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "updated_at" = now()`,
         [workspaceId, input.input.pilotWorkspace.name],
       )
       await client.query(
-        `INSERT INTO agronautas_auth_workspaces (id, workspace_key, name) VALUES ($1, 'agronautas-pilot', $2)
-         ON CONFLICT (workspace_key) DO UPDATE SET name = EXCLUDED.name`,
+        `INSERT INTO agronautas_auth_workspaces (id, workspace_key, name, updated_at) VALUES ($1, 'agronautas-pilot', $2, now())
+         ON CONFLICT (workspace_key) DO UPDATE SET name = EXCLUDED.name, updated_at = now()`,
         [workspaceId, input.input.pilotWorkspace.name],
       )
       const adminUserId = randomUUID()
-      await client.query('INSERT INTO agronautas_auth_users (id, email, display_name, password_hash) VALUES ($1, $2, $3, $4)', [adminUserId, input.input.admin.email.toLowerCase(), input.input.admin.displayName, input.passwordHash])
+      await client.query('INSERT INTO agronautas_auth_users (id, email, display_name, password_hash, updated_at) VALUES ($1, $2, $3, $4, now())', [adminUserId, input.input.admin.email.toLowerCase(), input.input.admin.displayName, input.passwordHash])
       await client.query(
-        `INSERT INTO agronautas_auth_memberships (id, user_id, workspace_id, role, scopes)
-         VALUES ($1, $2, $3, 'admin', $4::jsonb)`,
+        `INSERT INTO agronautas_auth_memberships (id, user_id, workspace_id, role, scopes, updated_at)
+         VALUES ($1, $2, $3, 'admin', $4::jsonb, now())`,
         [randomUUID(), adminUserId, workspaceId, JSON.stringify(['read', 'write', 'recompute', 'admin'])],
       )
       for (const mapping of input.input.fieldMappings) {
         await client.query(
-          `INSERT INTO agronautas_auth_field_mappings (field_id, workspace_id, workspace_key)
-           VALUES ($1, $2, $3)
+          `INSERT INTO agronautas_auth_field_mappings (field_id, workspace_id, workspace_key, updated_at)
+           VALUES ($1, $2, $3, now())
            ON CONFLICT (field_id) DO NOTHING`,
           [mapping.fieldId, workspaceId, mapping.workspaceKey],
         )
@@ -256,8 +256,8 @@ export class PostgresAgronautasAuthRepository implements AuthRepository {
       const unmappedFieldIds = unmapped.rows.map((row) => String(row.id))
        const result: BootstrapTransactionResult = { status: 'created', workspaceId, adminUserId, mappedFieldIds, unmappedFieldIds }
       await client.query(
-        `INSERT INTO agronautas_auth_bootstrap_state (singleton_id, idempotency_key, input_hash, workspace_id, admin_user_id, mapped_field_ids, unmapped_field_ids, secret_consumed_at)
-         VALUES ('agronautas', $1, $2, $3, $4, $5::jsonb, $6::jsonb, now())`,
+        `INSERT INTO agronautas_auth_bootstrap_state (singleton_id, idempotency_key, input_hash, workspace_id, admin_user_id, mapped_field_ids, unmapped_field_ids, secret_consumed_at, updated_at)
+         VALUES ('agronautas', $1, $2, $3, $4, $5::jsonb, $6::jsonb, now(), now())`,
         [input.input.idempotencyKey, input.inputHash, workspaceId, adminUserId, JSON.stringify(mappedFieldIds), JSON.stringify(unmappedFieldIds)],
       )
       await client.query('COMMIT')
@@ -303,3 +303,5 @@ function toRefresh(row: QueryResultRow): AuthRefreshRecord {
 function toStringArray(value: unknown): string[] { return Array.isArray(value) ? value.map(String) : [] }
 function isRole(value: unknown): value is AuthRole { return value === 'reader' || value === 'operator' || value === 'admin' }
 function isScope(value: unknown): value is AuthScope { return value === 'read' || value === 'write' || value === 'recompute' || value === 'admin' }
+
+

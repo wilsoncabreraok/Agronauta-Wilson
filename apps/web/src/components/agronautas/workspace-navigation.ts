@@ -16,15 +16,9 @@ export type OperationalWorkspaceView =
 
 export const OPERATIONAL_WORKSPACE_VIEWS = [
   { key: WORKSPACE_VIEW_VALUES.FIELDS, label: 'Campos', anchor: 'agronautas-intake' },
-  { key: WORKSPACE_VIEW_VALUES.ACTIVITY, label: 'Actividad', anchor: 'agronautas-activity' },
-  { key: WORKSPACE_VIEW_VALUES.GEOMETRY, label: 'Geometría', anchor: 'agronautas-geometry' },
-  { key: WORKSPACE_VIEW_VALUES.MANAGEMENT, label: 'Gestión', anchor: 'agronautas-management' },
   { key: WORKSPACE_VIEW_VALUES.LIVESTOCK, label: 'Hacienda', anchor: 'agronautas-livestock' },
-  { key: WORKSPACE_VIEW_VALUES.AGRONOMY, label: 'Agronomía', anchor: 'agronautas-agronomy' },
-  { key: WORKSPACE_VIEW_VALUES.PLANNING, label: 'Planificación', anchor: 'agronautas-planning' },
-  { key: WORKSPACE_VIEW_VALUES.EVIDENCE, label: 'Evidencia', anchor: 'agronautas-evidence' },
-  { key: WORKSPACE_VIEW_VALUES.INTELLIGENCE, label: 'Inteligencia', anchor: 'agronautas-intelligence' },
-  { key: WORKSPACE_VIEW_VALUES.COPILOT, label: 'Copilot', anchor: 'agronautas-copilot' },
+  { key: WORKSPACE_VIEW_VALUES.AGRONOMY, label: 'Agronomia', anchor: 'agronautas-agronomy' },
+  { key: WORKSPACE_VIEW_VALUES.COPILOT, label: 'Copilot', anchor: 'agronautas-copilot' }
 ] as const
 
 export const DEMO_WORKSPACE_VIEWS = OPERATIONAL_WORKSPACE_VIEWS

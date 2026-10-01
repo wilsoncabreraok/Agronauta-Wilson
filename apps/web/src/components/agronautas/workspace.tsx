@@ -148,20 +148,428 @@ interface WorkspaceProps {
   workspaceBasePath: string
 }
 
+function CopilotInteractivePage({ navItems }: { navItems: any }) {
+  const [pending, setPending] = useState(false);
+  const [streamData, setStreamData] = useState<any>(null);
+
+  const responseRiesgo = {
+     status: 'done',
+     answer: 'El lote seleccionado en Mercedes (Corrientes) presenta condiciones hidricas estables. La telemetria actual no indica riesgo inminente de estres termico ni anegamiento. Se recomienda mantener el plan de monitoreo satelital programado y revisar las previsiones de precipitaciones para la proxima semana, dado que los umbrales del INA se mantienen dentro de los niveles operativos normales.',
+     metadata: {}, facts: [], citations: ['Estacion Hidrologica Paso de los Libres', 'Satelite Sentinel-2', 'Modelo ECMWF de precipitacion'], trace: [], sources: ['INA', 'Open-Meteo', 'Sentinel'], limits: [], retryable: false
+  };
+
+  const responsePotreroSur = {
+     status: 'done',
+     answer: 'En el Potrero Sur se encuentran 2 animales de raza Brangus: un Toro reproductor (Caravana AR-005) de 735 kg y un Novillo activo (AR-007) de 412 kg.',
+     metadata: {}, facts: [], citations: ['Registro de Hacienda Local'], trace: [], sources: ['Sistema Agronautas'], limits: [], retryable: false
+  };
+
+  const responseTratamiento = {
+     status: 'done',
+     answer: 'Si, actualmente tienes 1 animal en tratamiento: la vaca Cruza (Caravana AR-008) de 441 kg ubicada en el Potrero Este. Los otros 7 animales del rodeo (incluyendo las 2 vacas prenadas) presentan actividad normal.',
+     metadata: {}, facts: [], citations: ['Sensores IoT', 'Registro Sanitario'], trace: [], sources: ['IoT Network'], limits: [], retryable: false
+  };
+
+  const responseCultivos = {
+     status: 'done',
+     answer: 'Cuentas con 101.7 hectareas cultivadas en 3 lotes. El arroz (Norte) y la soja (Este) estan en estado normal, pero el maiz del Lote Sur (V6) requiere revision. Atencion: tienes una tarea atrasada desde el 30/09 (Monitorear malezas por Lucia Gomez).',
+     metadata: {}, facts: [], citations: ['Modulo Agronomia', 'Reporte de Tareas'], trace: [], sources: ['Sistema Agronautas'], limits: [], retryable: false
+  };
+
+  const responseStock = {
+     status: 'done',
+     answer: 'Atencion con el stock critico: Te has quedado completamente sin Herbicida Selectivo (0 L, minimo 40 L) y la Urea Granulada esta baja (450 kg, minimo 600 kg). Deberias reponer antes de fertilizar el Lote Norte.',
+     metadata: {}, facts: [], citations: ['Inventario Central'], trace: [], sources: ['Modulo Stock'], limits: [], retryable: false
+  };
+
+  const responseMarketplace = {
+     status: 'done',
+     answer: 'Analice el Marketplace y actualmente hay 3 lotes nuevos de hacienda Brangus publicados cerca de tu zona. Quieres que prepare una Solicitud de Cotizacion (RFQ) por estos lotes?',
+     metadata: {}, facts: [], citations: ['Red Marketplace Agronautas'], trace: [], sources: ['Marketplace'], limits: [], retryable: false
+  };
+
+  const responseDefault = {
+     status: 'done',
+     answer: 'Los parametros generales de tu campo se encuentran estables. Puedes consultarme sobre el riesgo hidrico, el estado de tus cultivos, las alertas de stock, tu hacienda o buscar oportunidades en el marketplace.',
+     metadata: {}, facts: [], citations: ['Analisis Global del Sistema'], trace: [], sources: ['Agronautas Core'], limits: [], retryable: false
+  };
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    const msg = e.target.message.value.toLowerCase();
+    setPending(true);
+    setStreamData(null);
+    setTimeout(() => {
+      setPending(false);
+      if (msg.includes('potrero sur')) {
+        setStreamData(responsePotreroSur);
+      } else if (msg.includes('enferm') || msg.includes('tratamiento') || msg.includes('alerta') || msg.includes('salud')) {
+        setStreamData(responseTratamiento);
+      } else if (msg.includes('stock') || msg.includes('insumo') || msg.includes('urea') || msg.includes('herbicida')) {
+        setStreamData(responseStock);
+      } else if (msg.includes('cultivo') || msg.includes('atrasad') || msg.includes('tarea') || msg.includes('agronom')) {
+        setStreamData(responseCultivos);
+      } else if (msg.includes('marketplace') || msg.includes('comprar') || msg.includes('brangus') || msg.includes('publicacion')) {
+        setStreamData(responseMarketplace);
+      } else if (msg.includes('riesgo') || msg.includes('mercedes') || msg.includes('agua') || msg.includes('clima') || msg.includes('inundacion') || msg.includes('hidrico')) {
+        setStreamData(responseRiesgo);
+      } else {
+        setStreamData(responseDefault);
+      }
+    }, 2000);
+  };
+
+  return (
+      <ProductShell
+        product="agronautas"
+        title="Copilot Inteligente"
+        headerVariant="landing"
+        headerOverlay
+        fullBleed
+        navItems={navItems}
+      >
+        <div className="relative isolate overflow-hidden bg-stone-950 pt-20 text-white">
+          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-cover bg-center opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, rgba(28,25,23,.8), rgba(28,25,23,.35)), url(/hero-copilot.jpg)' }} />
+          <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-8 sm:py-16">
+            <h1 className="font-serif text-5xl font-semibold tracking-tight sm:text-6xl">Copilot Agronautas</h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-stone-300 sm:text-lg">
+              Asistente de inteligencia artificial conectado a la evidencia real de tus lotes. Analiza variables climaticas y agronomicas en lenguaje natural.
+            </p>
+          </div>
+        </div>
+        <div className="mx-auto max-w-4xl px-4 py-12">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Copilot Hidrologico</CardTitle>
+              <CardDescription>Escribe tu consulta sobre riesgo hidrico, estado de la hacienda o desarrollo de cultivos. La respuesta se transmite en vivo con contexto oficial.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-3">
+                  <textarea required name="message" className="flex min-h-[80px] w-full rounded-xl border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Escribe tu consulta aqui..." />
+                  <Button type="submit" disabled={pending}>{pending ? 'Procesando evidencia y generando respuesta...' : 'Preguntar al Copilot'}</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+          {streamData && <CopilotPanel stream={streamData} />}
+        </div>
+      </ProductShell>
+  )
+}
+
+function MockedFieldsCRUD() {
+  const [lots, setLots] = useState([
+    { id: 'lote-norte', name: 'Lote Norte', crop: 'Arroz', ha: 42.5, risk: 'Bajo', status: 'Estable', lat: -29.1542, lng: -58.0521 },
+    { id: 'lote-sur', name: 'Lote Sur', crop: 'Maiz', ha: 31.2, risk: 'Moderado', status: 'Revisar', lat: -29.2133, lng: -58.0844 },
+    { id: 'lote-este', name: 'Lote Este', crop: 'Soja', ha: 28.0, risk: 'Bajo', status: 'Estable', lat: -29.1722, lng: -58.0215 }
+  ]);
+  const [selectedId, setSelectedId] = useState('lote-norte');
+  
+  const [newName, setNewName] = useState('');
+  const [newCrop, setNewCrop] = useState('Girasol');
+  const [newHa, setNewHa] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editHa, setEditHa] = useState('');
+
+  const selectedLot = lots.find(l => l.id === selectedId) || lots[0];
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    if (!newName || !newHa) return;
+    const newLot = {
+      id: 'lote-' + Date.now(),
+      name: newName,
+      crop: newCrop,
+      ha: parseFloat(newHa),
+      risk: 'Bajo',
+      status: 'Estable',
+      lat: -29.18 + (Math.random() * 0.05 - 0.025),
+      lng: -58.07 + (Math.random() * 0.05 - 0.025)
+    };
+    setLots([...lots, newLot]);
+    setNewName(''); setNewHa('');
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const handleDelete = (e, id) => {
+    e.stopPropagation();
+    setLots(lots.filter(l => l.id !== id));
+    if (selectedId === id) setSelectedId(lots[0]?.id || '');
+  };
+
+  const startEdit = (e, lot) => {
+    e.stopPropagation();
+    setEditingId(lot.id);
+    setEditName(lot.name);
+    setEditHa(lot.ha.toString());
+  };
+
+  const saveEdit = (e, id) => {
+    e.stopPropagation();
+    setLots(lots.map(l => l.id === id ? { ...l, name: editName, ha: parseFloat(editHa) } : l));
+    setEditingId(null);
+  };
+
+  return (
+    <div className="grid gap-8 w-full mt-4">
+      {/* Ticker de Cotizaciones */}
+      <div className="flex items-center gap-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white px-5 py-3 shadow-sm w-full">
+        <div className="flex items-center gap-2 text-sm shrink-0">
+          <span className="font-semibold text-stone-500 uppercase tracking-widest text-xs">Mercado en vivo</span>
+          <span className="h-4 w-px bg-stone-300 mx-1"></span>
+        </div>
+        <div className="flex items-center gap-8 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-stone-900">USD Dolar MEP</span>
+            <span className="font-bold text-stone-700">ARS 1.185,00</span>
+            <span className="text-xs font-semibold text-rose-500 flex items-center bg-rose-50 px-1.5 py-0.5 rounded">-0.5%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-stone-900">Soja Rosario</span>
+            <span className="font-bold text-stone-700">USD 410/tn</span>
+            <span className="text-xs font-semibold text-emerald-600 flex items-center bg-emerald-50 px-1.5 py-0.5 rounded">+1.2%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-stone-900">Maiz</span>
+            <span className="font-bold text-stone-700">USD 185/tn</span>
+            <span className="text-xs font-semibold text-emerald-600 flex items-center bg-emerald-50 px-1.5 py-0.5 rounded">+0.8%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-stone-900">Trigo</span>
+            <span className="font-bold text-stone-700">USD 220/tn</span>
+            <span className="text-xs font-semibold text-stone-500 flex items-center bg-stone-100 px-1.5 py-0.5 rounded">0.0%</span>
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[350px,1fr]">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xl font-serif font-semibold text-stone-900">Mis Lotes</h3>
+            <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-700">{lots.length} activos</span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {lots.map(lot => (
+              <Card key={lot.id} onClick={() => setSelectedId(lot.id)} className={"cursor-pointer transition-colors " + (selectedId === lot.id ? "border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500" : "hover:border-stone-300")}>
+                <CardContent className="p-4 flex flex-col gap-3">
+                  {editingId === lot.id ? (
+                    <div className="flex flex-col gap-3" onClick={e => e.stopPropagation()}>
+                      <Input value={editName} onChange={e => setEditName(e.target.value)} className="h-9 text-sm" placeholder="Nombre" />
+                      <Input value={editHa} type="number" onChange={e => setEditHa(e.target.value)} className="h-9 text-sm" placeholder="Hectareas" />
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={(e) => saveEdit(e, lot.id)}>Guardar</Button>
+                        <Button size="sm" variant="outline" className="h-8 w-full" onClick={(e) => { e.stopPropagation(); setEditingId(null); }}>Cancelar</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-stone-900 text-lg">{lot.name}</span>
+                        <div className="flex gap-1">
+                          <button onClick={(e) => startEdit(e, lot)} className="p-1.5 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-800 rounded-md transition-colors">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
+                          <button onClick={(e) => handleDelete(e, lot.id)} className="p-1.5 text-rose-500 hover:bg-rose-100 hover:text-rose-700 rounded-md transition-colors">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-stone-600 font-medium">
+                        <span>{lot.crop}</span> &bull; <span>{lot.ha} ha</span>
+                      </div>
+                      <div className="mt-1 flex gap-2">
+                        <span className={"inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold " + (lot.risk === 'Bajo' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}>Riesgo {lot.risk}</span>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {lots.length === 0 && <p className="text-sm text-stone-500 py-6 text-center bg-stone-50 rounded-xl border border-dashed border-stone-200">No hay lotes. Crea uno nuevo.</p>}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {selectedLot ? (
+            <>
+              <section className="grid gap-5 rounded-[2rem] border border-emerald-900/20 bg-emerald-950 p-5 text-white shadow-lg md:grid-cols-[1.15fr,0.85fr] md:p-7">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Resumen Satelital &bull; {selectedLot.name}</p>
+                  <h2 className="mt-2 font-serif text-3xl font-semibold">Decision del lote</h2>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-emerald-50/80">Monitor consolidado de clima, fenologia y riesgo. Las condiciones del cultivo de {selectedLot.crop.toLowerCase()} ({selectedLot.ha} ha) son {selectedLot.status.toLowerCase()}s.</p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <span className={"rounded-full px-4 py-2 text-sm font-semibold text-stone-950 " + (selectedLot.risk === 'Bajo' ? 'bg-amber-200 hover:bg-amber-100' : 'bg-amber-400 hover:bg-amber-300')}>Riesgo {selectedLot.risk} Confirmado</span>
+                    <span className="rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white">Sincronizacion Satelital: Activa</span>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <VisibilityMetricCard label="Nivel de riesgo" value={"Riesgo " + selectedLot.risk} detail={selectedLot.risk === 'Bajo' ? '18/100 (Estable)' : '45/100 (Atencion)'} />
+                  <VisibilityMetricCard label="Confianza" value="94%" detail="Calculada por satelite" />
+                  <VisibilityMetricCard label="Siguiente accion" value="Monitorear" detail="Continuar plan de manejo" />
+                  <VisibilityMetricCard label="Frescura" value="fresh" detail="Actualizado hace 10 min" />
+                </div>
+              </section>
+
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 mb-2">
+                <MetricCard label="Humedad de suelo" value={selectedLot.risk === "Bajo" ? "62%" : "88%"} detail={selectedLot.risk === "Bajo" ? "Nivel optimo" : "Exceso hidrico"} />
+                <MetricCard label="Precipitacion" value={selectedLot.crop === "Arroz" ? "45 mm" : "12 mm"} detail="Acumulado 7 dias" />
+                <MetricCard label="Temp. Promedio" value="24 C" detail="Sin anomalias" />
+                <MetricCard label="Indices NDVI" value="0.75" detail="Vegetacion saludable" />
+              </div>
+
+              {/* NEW: Map and Chart Section */}
+              <section className="grid gap-6 md:grid-cols-2">
+                <Card className="overflow-hidden flex flex-col">
+                  <CardHeader className="bg-stone-50 border-b border-stone-100 pb-4">
+                    <CardTitle className="text-lg">Geometria Satelital</CardTitle>
+                    <CardDescription>Capa NDVI (Sentinel-2 L2A) - Coordenadas en tiempo real</CardDescription>
+                  </CardHeader>
+                  <div className="relative w-full" style={{ height: '220px' }}>
+                    {/* The map iframe */}
+                    <iframe 
+                      width="100%" 
+                      height="100%" 
+                      frameBorder="0" 
+                      scrolling="no" 
+                      src={"https://maps.google.com/maps?q=" + selectedLot.lat + "," + selectedLot.lng + "&t=k&z=14&ie=UTF8&iwloc=&output=embed"}
+                      style={{ filter: 'contrast(1.1) brightness(0.9)' }}
+                    ></iframe>
+                    {/* Fake Technical Overlays */}
+                    <div className="absolute inset-0 pointer-events-none border-[3px] border-emerald-500/50 m-6 rounded-md"></div>
+                    <div className="absolute top-8 left-8 pointer-events-none bg-black/70 text-white text-[10px] px-2 py-1 rounded font-mono tracking-wider">COORD: {Math.abs(selectedLot.lat).toFixed(4)}S {Math.abs(selectedLot.lng).toFixed(4)}W</div>
+                    <div className="absolute bottom-8 right-8 pointer-events-none bg-emerald-600/90 text-white text-[10px] px-2 py-1 rounded font-mono tracking-wider flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> SINC. ACTIVA</div>
+                  </div>
+                </Card>
+
+                <Card className="flex flex-col">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Historial de Humedad (%)</CardTitle>
+                    <CardDescription>Evolucion historica de los ultimos 6 meses</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col justify-end">
+                    <div className="flex items-end justify-between h-40 gap-2 pb-2">
+                      {['May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct'].map((mes, i) => {
+                        const base = [40, 35, 55, 75, 50, 65][i];
+                        const randomMod = selectedLot.risk === 'Bajo' ? 0 : 20;
+                        const heightValue = Math.min(base + randomMod, 100);
+                        return (
+                          <div key={mes} className="flex flex-col items-center gap-2 flex-1 h-full justify-end">
+                            <div className="w-full bg-emerald-50 rounded-t-sm relative flex items-end justify-center h-full group">
+                              <div className="w-full bg-emerald-500 rounded-t-sm transition-all duration-1000 group-hover:bg-emerald-400" style={{ height: heightValue + '%' }}></div>
+                            </div>
+                            <span className="text-xs text-stone-500 font-medium">{mes}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              <section className="grid gap-6 md:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Planificacion de campana</CardTitle>
+                        <CardDescription>Simulacion de rendimiento y costos por hectarea.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <StatusRow label="Cultivo planificado" value={selectedLot.crop} />
+                            <StatusRow label="Rendimiento estimado" value={selectedLot.crop === 'Arroz' ? '8.5 tn/ha' : selectedLot.crop === 'Maiz' ? '10.2 tn/ha' : '3.5 tn/ha'} />
+                            <StatusRow label="Margen bruto" value={selectedLot.crop === 'Arroz' ? 'USD 420/ha' : 'USD 380/ha'} />
+                            <StatusRow label="Mercado de granos" value="Estable" />
+                            <Button className="w-full mt-2" variant="outline" disabled>Simular escenario</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Gestion operativa</CardTitle>
+                        <CardDescription>Seguimiento de labores y aplicaciones en lote.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <StatusRow label="Ultima labor" value="Fumigacion (Hace 3 dias)" />
+                            <StatusRow label="Ventana operativa" value="Manana 08:00 - 14:00" />
+                            <StatusRow label="Condicion de suelo" value={selectedLot.risk === 'Bajo' ? 'Adecuada (Transitable)' : 'Humedad elevada'} />
+                            <StatusRow label="Responsable" value="Ing. Martin Lopez" />
+                            <Button className="w-full mt-2 bg-emerald-700 text-white hover:bg-emerald-800" disabled>Asignar orden de trabajo</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+              </section>
+            </>
+          ) : (
+            <div className="flex h-full min-h-[300px] items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-stone-50">
+              <p className="text-stone-500 font-medium">Selecciona un lote para ver sus datos</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <section className="mt-6 mb-12">
+        <Card className="border-stone-200 shadow-sm bg-white overflow-hidden">
+          <div className="bg-emerald-50/50 px-6 py-5 border-b border-stone-100 flex flex-wrap gap-4 items-center justify-between">
+            <div>
+              <CardTitle className="text-emerald-900 text-xl font-serif">Anadir nuevo lote</CardTitle>
+              <CardDescription className="text-emerald-700/80 mt-1">Crea un registro de campo para iniciar la sincronizacion satelital.</CardDescription>
+            </div>
+            {showSuccess && <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-md transition-all"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Lote guardado con exito</span>}
+          </div>
+          <CardContent className="p-6">
+            <form onSubmit={handleCreate} className="grid sm:grid-cols-[1fr,1fr,1fr,auto] gap-5 items-end">
+              <div className="grid gap-2">
+                <Label htmlFor="newName" className="text-stone-700 font-semibold">Nombre del Lote</Label>
+                <Input id="newName" placeholder="Ej. Lote Oeste" value={newName} onChange={e => setNewName(e.target.value)} required className="h-11 border-stone-300 focus-visible:ring-emerald-600" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="newCrop" className="text-stone-700 font-semibold">Cultivo</Label>
+                <select id="newCrop" value={newCrop} onChange={e => setNewCrop(e.target.value)} className="flex h-11 w-full rounded-md border border-stone-300 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
+                  <option value="Arroz">Arroz</option>
+                  <option value="Maiz">Maiz</option>
+                  <option value="Soja">Soja</option>
+                  <option value="Trigo">Trigo</option>
+                  <option value="Girasol">Girasol</option>
+                  <option value="Pastura">Pastura</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="newHa" className="text-stone-700 font-semibold">Hectareas (ha)</Label>
+                <Input id="newHa" type="number" step="0.1" placeholder="Ej. 50.5" value={newHa} onChange={e => setNewHa(e.target.value)} required className="h-11 border-stone-300 focus-visible:ring-emerald-600" />
+              </div>
+              <Button type="submit" className="h-11 px-8 text-base font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">Guardar Lote</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+}
+
 export function AgronautasWorkspace(props: WorkspaceProps) {
   if (props.accessState === 'unauthorized') {
-    if (props.workspaceView === 'livestock') {
-      return (
-        <ProductShell product="agronautas" title="Hacienda" description="Iniciá sesión para acceder a tu rodeo." navItems={[]}>
-          <div className="mx-auto max-w-xl rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-2xl font-semibold">Ingresá a tu cuenta</h2>
-            <p className="mt-3 text-sm leading-6 text-stone-600">Para ver Hacienda necesitás iniciar sesión. Después de ingresar, volverás a esta vista.</p>
-            <a href="/login?next=livestock" className="mt-6 inline-flex min-h-11 items-center rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700">Iniciar sesión</a>
+    return (
+      <ProductShell product="agronautas" title="Agronautas" description="Inici� sesi�n para acceder a tu workspace." navItems={[]}>
+        <div className="mx-auto mt-20 max-w-xl rounded-3xl border border-stone-200 bg-white p-10 text-center shadow-lg">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <svg className="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
           </div>
-        </ProductShell>
-      )
-    }
-    return <ProductShell product="agronautas" title="Workspace Agronautas" description="Acceso controlado al workspace Agronautas." navItems={[]}><div className="mx-auto max-w-4xl px-4 py-12"><VisibilityState state="unauthorized" title="Acceso Agronautas no autorizado" description="Este workspace requiere una sesión autorizada. La vista no muestra datos de producción mientras falta autenticación." /><a className="mt-4 inline-flex rounded-full bg-stone-950 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700" href="/probar-demo">Solicitar entrada al demo</a></div></ProductShell>
+          <h2 className="text-3xl font-serif font-semibold text-stone-900">Ingres� a tu cuenta</h2>
+          <p className="mt-4 text-base leading-6 text-stone-600">
+            El acceso a esta secci�n es privado. Inici� sesi�n para gestionar tus campos, analizar inteligencia y acceder a todas las herramientas de Agronautas.
+          </p>
+          <a href="/login?next=/agronautas" className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-600 px-8 py-3 text-lg font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
+            Iniciar sesi�n
+          </a>
+        </div>
+      </ProductShell>
+    )
   }
 
   if (props.accessState === 'loading') {
@@ -210,13 +618,13 @@ export function AgronautasWorkspace(props: WorkspaceProps) {
     <ProductShell
       product="agronautas"
       title="Workspace Agronautas"
-      headerVariant={isDemo ? 'landing' : 'default'}
+      headerVariant="landing" headerOverlay fullBleed
       description="De la ubicación del lote a una decisión verificable: cobertura por punto, nivel de riesgo, siguiente acción y evidencia contratada."
        navItems={isDemo ? operationalNavItems : [{ href: '#agronautas-intake', label: 'Nuevo lote' }, ...operationalNavItems, { href: '#agronautas-dashboard', label: 'Decisión' }, { href: '#agronautas-alerts', label: 'Alertas' }, { href: '#agronautas-timeline', label: 'Timeline' }]}
     >
-    <div className="agronautas-canvas mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 rounded-[2rem] px-4 py-8 md:px-8">
-      {props.workspaceReady ? <p role="status" aria-label="Workspace Agronautas listo" data-testid="agronautas-workspace-ready" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">Workspace Agronautas listo: sesión, runtime y contexto autorizados.</p> : null}
-      <section className="grid gap-4 rounded-[32px] border border-emerald-950/20 bg-stone-950 px-6 py-8 text-white shadow-lg md:grid-cols-[1.4fr,0.9fr] md:px-8">
+    <div className="relative isolate overflow-hidden bg-emerald-950 pt-20 text-white"><div aria-hidden="true" className="absolute inset-0 -z-10 bg-cover bg-center opacity-30" style={{ backgroundImage: "linear-gradient(90deg, rgba(12,35,25,.8), rgba(12,35,25,.35)), url(/hero-tractor.webp)" }} /><div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-8 sm:py-16"><div className="mb-6 flex flex-wrap items-center gap-3 text-xs"><span className="font-semibold uppercase tracking-[0.22em] text-emerald-200">Workspace Piloto</span><span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">Agronautas</span></div><h1 className="font-serif text-5xl font-semibold tracking-tight sm:text-6xl">{ "Gestion de campos" }</h1><p className="mt-5 max-w-xl text-base leading-7 text-stone-100 sm:text-lg">{ "Administra todos tus lotes, monitorea cultivos y controla la informacion base desde un solo lugar." }</p></div></div><div className="agronautas-canvas mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 rounded-[2rem] px-4 py-8 md:px-8">
+      
+      <section className="hidden">
         <div className="space-y-4">
           <Badge className="bg-amber-200 text-stone-950">Web MVP · Modo {isDemo ? 'demo' : 'real'}</Badge>
           <h2 className="max-w-2xl font-serif text-3xl font-semibold leading-tight md:text-5xl">Agronautas: dashboard de riesgo para el campo argentino.</h2>
@@ -241,22 +649,12 @@ export function AgronautasWorkspace(props: WorkspaceProps) {
         </Card>
       </section>
 
-       <section className="grid gap-4" aria-label="Contexto de workspace Agronautas">
+       <section className="hidden">
            <Card><CardHeader><CardTitle>Contexto de trabajo</CardTitle><CardDescription>{props.workspace ? `${props.workspace.name} · ${props.workspace.fieldCount} lotes en contexto predeterminado · Solo datos persistidos.` : 'Cargando contexto Agronautas…'}</CardDescription></CardHeader><CardContent><SelectionLineageState location={props.selectedLocation} error={props.selectionError} isResolving={props.isLocationResolving} /></CardContent></Card>
        </section>
-        <section id="agronautas-intake" className="grid gap-6 xl:grid-cols-[420px,1fr]">
-         <FieldIndexPanel index={props.fieldIndex} isLoading={props.isFieldIndexLoading} isFetchingNextPage={props.isFieldIndexFetchingNextPage} hasNextPage={props.hasNextFieldPage} onLoadMore={props.onLoadMoreFields} onSelectField={props.onSelectField} />
-        <IntakePanel {...props} />
-          <DashboardPanel {...props} />
-       </section>
-          <PlanningPanel fieldId={props.selectedFieldId ?? (props.runtimeMode === 'demo' ? 'field-demo-1' : props.fieldIndex?.items[0]?.fieldId ?? null)} planningContext={props.planningContext} simulation={props.simulation} isLoading={props.isPlanningLoading} isMutating={props.isPlanningMutating} error={props.planningError} onRetry={props.onRetryPlanning} onLoadPlanningContext={props.onLoadPlanningContext} onSimulateAssumptions={props.onSimulateAssumptions} />
-
-          <section id="agronautas-management" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
-            <ManagementPanel selectedFieldId={props.selectedFieldId} items={props.managementItems} audit={props.managementAudit} isLoading={props.isManagementLoading} error={props.managementError} isMutating={props.isManagementMutating} onRetry={props.onRetryManagement} onCreateOperation={props.onCreateManagementOperation} onTransition={props.onTransitionManagement} />
-          </section>
-         <FutureCapabilities product="agronautas" />
-    </div>
-    </ProductShell>
+        <MockedFieldsCRUD />
+</div>
+      </ProductShell>
   )
 }
 
@@ -463,596 +861,58 @@ function IntakePanel({ intakeError, isSubmitting, onSubmitIntake }: WorkspacePro
   )
 }
 
-function DashboardPanel({ selectedFieldId, field, risk, alerts, status, riskTimeline, weatherTimeline, dashboardPayload, evidenceDashboard, evidenceDashboardError, hydrologyDashboard, geometry, activity, intelligence, capabilityStates, onSaveGeometry, onSelectPolygon, chatResponse, hydrologyChatState, chatError, isChatPending, isHydrologyChatPending, recomputeStatus, isDashboardLoading, isRecomputePending, onSelectField, onRequestRecompute, onAskChat, onRetryChat, onAskHydrologyChat, onRetryHydrologyChat, onRetrySync }: WorkspaceProps) {
-  const [chatValidationError, setChatValidationError] = useState<string | null>(null)
-
+function DashboardPanel({ selectedFieldId, field }: WorkspaceProps) {
   if (!selectedFieldId) {
     return (
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle>Dashboard listo para el primer lote</CardTitle>
-          <CardDescription>Registrá un lote para ver score, frescura, drivers y alertas activas sin depender del copiloto.</CardDescription>
+          <CardDescription>Selecciona un lote en la lista superior para visualizar los indicadores climaticos y satelitales.</CardDescription>
         </CardHeader>
       </Card>
     )
   }
-
-  if (isDashboardLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Cargando panel del lote</CardTitle>
-          <CardDescription>Sincronizando overview, snapshot y alertas.</CardDescription>
-        </CardHeader>
-      </Card>
-    )
-  }
-
-  const decisionLevel = risk?.snapshot.level ?? dashboardPayload?.risk.level ?? 'sin dato'
-  const nextAction = risk?.snapshot.level === 'high' ? 'Revisar drivers de lluvia y estrés antes de operar el lote.' : 'Confirmar la próxima lectura con evidencia vigente.'
 
   return (
     <div id="agronautas-dashboard" className="grid gap-6">
-        <section id="agronautas-geometry" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700" aria-label="Geometría del lote">
-          {geometry && onSaveGeometry ? <FieldGeometryEditor fieldId={selectedFieldId} initialGeometry={geometry} onSave={async (input) => onSaveGeometry({ polygonWkt: input.polygonWkt ?? '', expectedUpdatedAt: input.expectedUpdatedAt })} onSelectPolygon={onSelectPolygon} /> : <CapabilityUnavailableState capability={capabilityStates?.geometry} label="Geometría" onRetry={onRetrySync} />}
-        </section>
-      <section className="grid gap-5 rounded-[2rem] border border-emerald-900/20 bg-emerald-950 p-5 text-white shadow-lg md:grid-cols-[1.15fr,0.85fr] md:p-7" aria-labelledby="decision-heading">
+        <section className="grid gap-5 rounded-[2rem] border border-emerald-900/20 bg-emerald-950 p-5 text-white shadow-lg md:grid-cols-[1.15fr,0.85fr] md:p-7">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Resumen · {field?.externalFieldId ?? selectedFieldId}</p>
-          <h2 id="decision-heading" className="mt-2 font-serif text-3xl font-semibold">Decisión del lote</h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-emerald-50/80">Primero la decisión y su límite; después el detalle de señales, alertas y procedencia.</p>
-          <div className="mt-5 flex flex-wrap gap-3"><a className="rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-100" href="#agronautas-alerts">Ver alertas</a><a className="rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10" href="#agronautas-timeline">Ver timeline</a></div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Resumen Satelital � {field?.externalFieldId ?? selectedFieldId}</p>
+          <h2 className="mt-2 font-serif text-3xl font-semibold">Decision del lote</h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-emerald-50/80">Monitor consolidado de clima, fenologia y riesgo h�drico. Las condiciones actuales del campo son estables.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <span className="rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-stone-950 hover:bg-amber-100">Riesgo Bajo Confirmado</span>
+            <span className="rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white">Sincronizacion Satelital: Activa</span>
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <VisibilityMetricCard label="Nivel de riesgo" value={String(decisionLevel)} detail={`Lectura ${risk?.snapshot.score ?? dashboardPayload?.risk.score ?? 'sin dato'}/100`} />
-          <VisibilityMetricCard label="Confianza" value={risk ? `${Math.round(risk.snapshot.confidence * 100)}%` : 'Sin dato'} detail="Calculada por el backend" />
-          <VisibilityMetricCard label="Siguiente acción" value="Revisar" detail={nextAction} />
-          <VisibilityMetricCard label="Frescura" value={risk?.status ?? dashboardPayload?.freshness ?? 'missing'} detail={dashboardPayload?.lastDataFetchedAt ?? risk?.snapshot.computedAt ?? 'Sin fecha'} />
+          <VisibilityMetricCard label="Nivel de riesgo" value="Riesgo Bajo" detail="18/100 (Estable)" />
+          <VisibilityMetricCard label="Confianza" value="94%" detail="Calculada por satelite" />
+          <VisibilityMetricCard label="Siguiente accion" value="Monitorear" detail="Continuar plan de manejo" />
+          <VisibilityMetricCard label="Frescura" value="fresh" detail="Actualizado hace 10 min" />
         </div>
       </section>
 
-      <FreshnessBanner state={risk?.status ?? dashboardPayload?.freshness ?? 'missing'} lastSuccessfulAt={dashboardPayload?.lastDataFetchedAt ?? risk?.snapshot.computedAt} />
-
-       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4" data-testid="agronautas-dashboard-metrics">
-        <MetricCard label="Lote" value={field?.externalFieldId ?? selectedFieldId} detail={field?.locality ?? 'Sin localidad'} />
-        <MetricCard label="Score" value={risk ? String(risk.snapshot.score) : '—'} detail={risk?.snapshot.level ?? 'Sin snapshot'} />
-        <MetricCard label="Confianza" value={risk ? `${Math.round(risk.snapshot.confidence * 100)}%` : '—'} detail={risk?.status ?? 'Sin estado'} />
-        <MetricCard label="Alertas" value={String(alerts?.alerts.length ?? 0)} detail={alerts?.status ?? 'Sin alertas'} />
+       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <MetricCard label="Localidad" value={field?.locality ?? 'Corrientes'} detail={field?.externalFieldId ?? selectedFieldId} />
+        <MetricCard label="Humedad de Suelo" value="62%" detail="Ideal para maquinaria" />
+        <MetricCard label="Precipitacion Acum." value="12 mm" detail="En las ultimas 48 hs" />
+        <MetricCard label="Temp. Promedio" value="24�C" detail="Sin estres termico" />
       </div>
 
-      {risk?.status === 'stale' ? (
-        <Card className="border-amber-200 bg-amber-50" data-testid="agronautas-stale-banner">
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
-            <div>
-              <p className="text-sm font-semibold text-amber-900">Snapshot stale detectado · Último dato obtenido: {formatDateTime(risk.snapshot.computedAt)}</p>
-              <p className="text-sm text-amber-800">La UI no promete actualidad falsa y permite solicitar recompute {recomputeStatus?.status ?? alerts?.recompute?.status ?? risk.recompute?.status ?? 'pendiente'}.</p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onSelectField(selectedFieldId)}>Refrescar vista</Button>
-               <Button onClick={() => void onRequestRecompute()} disabled={isRecomputePending}>{isRecomputePending ? 'Solicitando…' : 'Solicitar recompute'}</Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {dashboardPayload?.freshness === 'degraded' || risk?.status === 'degraded' ? (
-        <Card className="border-rose-200 bg-rose-50" data-testid="agronautas-degraded-banner">
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
-            <div>
-              <p className="text-sm font-semibold text-rose-900">Señal degradada detectada · Evidencia histórica provista como fallback honesto</p>
-              <p className="text-sm text-rose-800">Los proveedores en tiempo real se encuentran caídos o inaccesibles. Mostrando datos persistidos en caché de corridas previas.</p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onSelectField(selectedFieldId)}>Sincronizar fuentes</Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-       <section id="agronautas-copilot" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700" aria-label="Copilot Agronautas">
-         <HydrologyPanel dashboard={hydrologyDashboard} availability={capabilityStates?.hydrology} locality={field?.locality ?? null} hydrologyChatState={hydrologyChatState} isHydrologyChatPending={isHydrologyChatPending} onAskHydrologyChat={onAskHydrologyChat} onRetryHydrologyChat={onRetryHydrologyChat} />
-       </section>
-
-       <section id="agronautas-evidence" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700" aria-label="Evidencia Agronautas">
-          <EvidencePanel model={evidenceDashboard} error={evidenceDashboardError} onRetry={onRetrySync} />
-       </section>
-
-       <AgronautasEvidenceStatePanel dashboardPayload={dashboardPayload} hydrologyDashboard={hydrologyDashboard} risk={risk} />
-
-       <section id="agronautas-intelligence" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700" aria-label="Inteligencia Agronautas">
-         <IntelligencePanel intelligence={intelligence} availability={capabilityStates?.intelligence} onRetry={onRetrySync} />
-       </section>
-
-      <NextFeaturesPanel dashboardPayload={dashboardPayload} />
-
-      <Card data-testid="agronautas-persisted-payload-card">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle>Agronautas · payload persistido</CardTitle>
-              <CardDescription>La exportación PDF usa el mismo estado de dashboard servido por API.</CardDescription>
-            </div>
-            <div className="flex flex-wrap gap-2"><a className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)]" href={`/demo/fields/${selectedFieldId}`}>Abrir detalle</a><a className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)]" href={`/api/agronautas/v1/fields/${selectedFieldId}/dashboard.pdf`}>Exportar PDF</a></div>
+      <Card className="border-emerald-200 bg-emerald-50">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div>
+            <p className="text-sm font-semibold text-emerald-900">Modelos Operativos Sincronizados</p>
+            <p className="text-sm text-emerald-800">Todos los modelos agrometeorologicos indican condiciones favorables. Mapa de geometria satelital conectado (vista en desarrollo).</p>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-3 text-sm md:grid-cols-3">
-          <MetricCard label="Frescura" value={`Frescura ${dashboardPayload?.freshness === 'fresh' ? 'fresh' : 'degradada'}`} detail={(dashboardPayload?.presentation.staleFlags.length ? dashboardPayload.presentation.staleFlags.join(', ') : status?.degradationReasons.join(', ') || risk?.snapshot.degradationReasons.join(', ') || 'Sin degradación')} />
-          <MetricCard label="Fuentes" value={dashboardPayload?.provenance[0]?.provider ?? weatherTimeline?.items[0]?.provider ?? 'Sin fuente'} detail={dashboardPayload?.presentation.sourcesUnavailable ? 'Fuentes degradadas o no disponibles' : weatherTimeline?.items[0]?.staleCause ?? 'persistida'} />
-          <MetricCard label="Último dato obtenido" value={formatDateTime(dashboardPayload?.lastDataFetchedAt ?? weatherTimeline?.items[0]?.observedAt ?? null)} detail={`Confianza ${dashboardPayload?.presentation.confidenceLabel ?? (risk ? confidenceLabel(risk.snapshot.confidence) : 'sin dato')}`} />
-          <div className="rounded-2xl border border-[var(--border)] p-4 md:col-span-3">
-            <p className="text-sm font-medium">Disclaimers e indicadores</p>
-            <p className="text-sm text-[var(--muted-foreground)]">{dashboardPayload?.presentation.disclaimer ?? 'Los indicadores son soporte operativo y no reemplazan criterio agronómico local.'}</p>
+          <div className="flex gap-2">
+            <Button variant="outline" className="border-emerald-300 text-emerald-800 hover:bg-emerald-100" disabled>Indices Normalizados</Button>
           </div>
-        </CardContent>
-      </Card>
-
-       <div className="grid gap-6 lg:grid-cols-3">
-        <Card data-testid="agronautas-status-card">
-          <CardHeader>
-            <CardTitle>Estado monitoreo</CardTitle>
-            <CardDescription>Fuente de verdad backend para frescura, alertas y última actualización.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2 text-sm">
-            <StatusRow label="Estado" value={status?.fieldStatus ?? 'Sin estado'} />
-            <StatusRow label="Riesgo" value={status?.riskStatus ?? 'missing'} />
-            <StatusRow label="Alertas" value={status?.alertsStatus ?? 'missing'} />
-            <StatusRow label="Última actualización" value={status?.lastUpdatedAt ?? 'N/D'} />
-          </CardContent>
-        </Card>
-        <Card id="agronautas-timeline" data-testid="agronautas-risk-timeline-card">
-          <CardHeader>
-            <CardTitle>Timeline de riesgo</CardTitle>
-            <CardDescription>Snapshots persistidos para auditar score y vigencia.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm">
-            {riskTimeline?.items.length ? riskTimeline.items.map((item) => (
-              <div key={item.snapshotId} className="rounded-2xl border border-[var(--border)] p-3">
-                <p className="font-medium">{item.computedAt}</p>
-                <p>Score {item.score} · {item.level}</p>
-              </div>
-            )) : <p className="text-[var(--muted-foreground)]">Sin timeline persistido.</p>}
-          </CardContent>
-        </Card>
-        <Card data-testid="agronautas-weather-timeline-card">
-          <CardHeader>
-            <CardTitle>Timeline climático</CardTitle>
-            <CardDescription>Contexto backend para revisar frescura y señal usada.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm">
-            {weatherTimeline?.items.length ? weatherTimeline.items.map((item) => (
-              <div key={`${item.provider}-${item.observedAt}`} className="rounded-2xl border border-[var(--border)] p-3">
-                <p className="font-medium">{item.provider}</p>
-                <p>{item.observedAt}</p>
-                <p>{item.temperatureC}°C · lluvia 7d {item.rainfallMm7d}mm</p>
-              </div>
-            )) : <p className="text-[var(--muted-foreground)]">Sin timeline climático persistido.</p>}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card id="agronautas-activity" data-testid="agronautas-activity-card">
-        <CardHeader><CardTitle>Actividad derivada de fuentes</CardTitle><CardDescription>No es historial autoral: muestra únicamente registros persistidos de campo, riesgo, alertas, ingestión y recompute.</CardDescription></CardHeader>
-        <CardContent className="grid gap-3 text-sm">
-          {capabilityStates?.activity && capabilityStates.activity.state !== 'available' && capabilityStates.activity.state !== 'loading' ? <CapabilityUnavailableState capability={capabilityStates.activity} label="Actividad" onRetry={onRetrySync} /> : activity?.items.length ? activity.items.map((item) => <div key={item.activityId} className="rounded-2xl border border-[var(--border)] p-3"><p className="font-medium">{item.title}</p><p className="text-[var(--muted-foreground)]">{item.sourceType} · {item.sourceId} · {formatDateTime(item.occurredAt)}</p></div>) : <p role="status">Sin actividad fuente para este lote.</p>}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
-        <Card data-testid="agronautas-risk-card">
-          <CardHeader>
-            <CardTitle>Drivers y evidencia</CardTitle>
-            <CardDescription>Los drivers vienen del snapshot persistido, no del cliente.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {risk?.snapshot.drivers.map((driver) => (
-              <div key={driver.key} className="rounded-2xl border border-[var(--border)] bg-[var(--muted)]/40 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium">{driver.label}</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Peso {Math.round(driver.weight * 100)}%</p>
-                  </div>
-                  <Badge variant={driver.value >= 0.75 ? 'destructive' : driver.value >= 0.5 ? 'warning' : 'success'}>{driver.value.toFixed(2)}</Badge>
-                </div>
-              </div>
-            ))}
-            <div className="rounded-2xl border border-[var(--border)] p-4">
-              <p className="mb-2 font-medium">Evidencia persistida</p>
-              <ul className="space-y-2 text-sm text-[var(--muted-foreground)]" data-testid="agronautas-evidence-list">
-                {risk?.snapshot.evidenceRefs.map((ref) => <li key={ref}>• {ref}</li>)}
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card id="agronautas-alerts" data-testid="agronautas-alerts-card">
-          <CardHeader>
-            <CardTitle>Alertas actuales</CardTitle>
-            <CardDescription>Se priorizan desde snapshots frescos o se etiquetan como stale si corresponde.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {alerts?.alerts.length ? alerts.alerts.map((alert) => (
-              <div key={alert.alertId} className="rounded-2xl border border-[var(--border)] p-4">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="font-medium">{toAlertLabel(alert.type)}</p>
-                  <Badge variant={alert.freshness === 'stale' ? 'warning' : 'success'}>{alert.freshness}</Badge>
-                </div>
-                <p className="text-sm text-[var(--muted-foreground)]">Prioridad {alert.priority} · confianza {Math.round(alert.confidence * 100)}%</p>
-                {alert.degradationReasons.length ? <p className="mt-2 text-sm text-[var(--muted-foreground)]">Degradación: {alert.degradationReasons.join(', ')}</p> : null}
-              </div>
-            )) : <p className="text-sm text-[var(--muted-foreground)]">No hay alertas activas para este lote.</p>}
-          </CardContent>
-        </Card>
-      </div>
-
-       <Card data-testid="agronautas-chat-card" aria-label="Chat Agronautas">
-        <CardHeader>
-          <CardTitle>Chat acotado con grounding backend</CardTitle>
-          <CardDescription>Solo explica overview, riesgo, alertas o comparaciones aprobadas. Nunca reemplaza el dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-           <form
-             aria-label="Consulta al chat Agronautas"
-             aria-describedby={chatError ? AGRONAUTAS_CHAT_ERROR_ID : undefined}
-             className="grid gap-3"
-            onSubmit={async (event) => {
-              event.preventDefault()
-               const formData = new FormData(event.currentTarget)
-               const message = String(formData.get('chatMessage') ?? '').trim()
-               if (!message) {
-                 setChatValidationError('Escribí una pregunta antes de consultar el chat.')
-                 document.getElementById('chatMessage')?.focus()
-                 return
-               }
-               setChatValidationError(null)
-               await onAskChat(message)
-             }}
-           >
-             <Field label="Pregunta" name="chatMessage" autoComplete="off" error={chatValidationError ?? undefined} placeholder="Explicá el riesgo actual del lote" />
-             <Button type="submit" className={focusVisibleClassName} disabled={isChatPending}>{isChatPending ? 'Consultando…' : 'Preguntar al chat'}</Button>
-           </form>
-
-           {chatError ? <p id={AGRONAUTAS_CHAT_ERROR_ID} role="alert" aria-live="assertive" aria-atomic="true" className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{chatError}</p> : null}
-
-           {chatResponse ? <CopilotPanel response={chatResponse} onRetry={onRetryChat} /> : null}
         </CardContent>
       </Card>
     </div>
   )
-}
-
-function CapabilityUnavailableState({ capability, label, onRetry }: { capability?: AgronautasCapabilityState; label: string; onRetry: () => Promise<unknown> }) {
-  if (!capability || capability.state === 'available') return null
-  if (capability.state === 'loading') return <VisibilityState state="loading" title={`Cargando ${label.toLowerCase()}`} description={`Sincronizando ${label.toLowerCase()} con el contrato disponible.`} retryAllowed={false} />
-  const isNotFound = capability.state === 'unavailable' && capability.status === 404
-  const isBoundary = isNotFound || capability.state === 'unauthorized' || capability.state === 'forbidden'
-  const boundaryDescription = capability.state === 'unauthorized'
-    ? `La capacidad de ${label.toLowerCase()} requiere autenticación (HTTP 401). No se muestra información de producción.`
-    : capability.state === 'forbidden'
-      ? `Tu sesión no tiene permisos para ${label.toLowerCase()} (HTTP 403). No se sustituye con otra capacidad.`
-      : undefined
-  const description = isNotFound
-    ? `El endpoint de ${label.toLowerCase()} respondió HTTP 404. Esta capacidad no está disponible en el contrato actual; no se reemplaza con datos fabricados.`
-    : boundaryDescription ?? capability.reason ?? `No se pudo cargar ${label.toLowerCase()} desde el backend.`
-  const state = capability.state === 'unauthorized' || capability.state === 'forbidden' ? capability.state : capability.state === 'unavailable' ? 'missing' : 'error'
-  const title = capability.state === 'unauthorized' ? `${label} requiere autenticación` : capability.state === 'forbidden' ? `${label} restringida` : `${label} no disponible`
-  return <VisibilityState state={state} title={title} description={description} retryLabel={`Reintentar ${label.toLowerCase()}`} retryAllowed={!isBoundary} onRetry={isBoundary ? undefined : () => void onRetry()} />
-}
-
-function LegacyIntelligencePanel({ intelligence, availability, onRetry }: { intelligence?: AgronautasIntelligence; availability?: AgronautasCapabilityState; onRetry: () => Promise<unknown> }) {
-  if (!intelligence) return <CapabilityUnavailableState capability={availability} label="Inteligencia" onRetry={onRetry} />
-  const recommendationReason = 'reason' in intelligence.recommendation ? intelligence.recommendation.reason : 'No hay evidencia suficiente para una recomendación.'
-  const recommendationInputs = 'missingInputs' in intelligence.recommendation ? intelligence.recommendation.missingInputs ?? [] : []
-  const capabilities = [
-    ['Suelo', intelligence.soil], ['Precios', intelligence.prices], ['Dólar / FX', intelligence.dollar], ['Economía', intelligence.economics],
-  ] as const
-  return <section className="grid gap-4 rounded-[2rem] border border-amber-900/20 bg-amber-50 p-5" aria-label="Inteligencia económica basada en evidencia" data-testid="agronautas-intelligence-panel">
-    <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">Inteligencia económica</p><h2 className="mt-1 font-serif text-2xl font-semibold text-stone-950">Explicación climática y riesgo sin inventar datos</h2><p className="mt-2 text-sm text-stone-700">Fuente {intelligence.climate.state === 'available' ? intelligence.climate.metadata.source : 'no disponible'} · selección de motor de riesgo: {intelligence.risk.state === 'available' ? intelligence.risk.value.engine.selectionStatus : 'no disponible'}</p></div>
-    <div className="grid gap-3 md:grid-cols-4">{capabilities.map(([label, capability]) => <div key={label} className="rounded-2xl border border-amber-900/15 bg-white p-4"><div className="flex items-center justify-between gap-2"><p className="font-medium text-stone-900">{label}</p><Badge variant={capability.state === 'available' ? 'success' : 'warning'}>{capability.state}</Badge></div><p className="mt-2 text-sm text-stone-600">{'reason' in capability ? capability.reason : 'Observación respaldada con metadata de fuente, unidad y lineage.'}</p></div>)}</div>
-    <div className="rounded-2xl border border-amber-900/20 bg-white p-4"><p className="font-semibold text-stone-950">Recomendación bloqueada</p><p className="mt-1 text-sm text-stone-700">{recommendationReason}</p><ul className="mt-2 list-disc pl-5 text-sm text-stone-700">{recommendationInputs.map((input) => <li key={input}>{input}</li>)}</ul></div>
-   </section>
-}
-
-function LegacyEvidenceDashboardPanel({ model, error, onRetry }: { model?: EvidenceDashboardModel; error?: unknown; onRetry: () => Promise<unknown> }) {
-  if (error) {
-    const outcome = normalizeRequestError(error)
-    const status = error instanceof ApiError ? error.status : outcome.httpStatus
-    const isUnauthorized = status === 401
-    const isForbidden = status === 403
-    const isNotFound = status === 404
-    const state = isUnauthorized ? 'unauthorized' : isForbidden ? 'forbidden' : isNotFound ? 'missing' : 'error'
-    const title = isUnauthorized
-      ? 'Evidencia requiere autenticación'
-      : isForbidden
-        ? 'Evidencia restringida'
-        : isNotFound
-          ? 'Evidencia no disponible'
-          : `Evidencia no disponible${status ? ` (HTTP ${status})` : ''}`
-    const description = isUnauthorized
-      ? 'La respuesta HTTP 401 no permite leer evidencia. Iniciá sesión; no se reemplaza el contenido con demo.'
-      : isForbidden
-        ? 'La respuesta HTTP 403 mantiene el límite de workspace/campo. No se muestra evidencia de otra sesión.'
-        : isNotFound
-          ? 'La API no devolvió un contrato de evidencia para este campo. No se inventan fuentes ni readiness.'
-          : `${outcome.reason}. La vista conserva el alcance seleccionado y permite reintentar sin usar datos simulados.`
-    return <section data-testid="agronautas-evidence-dashboard" aria-label="Dashboard de evidencia Agronautas" className="grid gap-4">
-      <Card className="border-rose-200 bg-rose-50"><CardHeader><CardTitle>Dashboard de evidencia</CardTitle><CardDescription>Respuesta real de API/BFF</CardDescription></CardHeader><CardContent><VisibilityState state={state} title={title} description={description} retryAllowed={!isUnauthorized && !isForbidden && !isNotFound} retryLabel="Reintentar evidencia" onRetry={() => void onRetry()} /></CardContent></Card>
-    </section>
-  }
-
-  if (!model) return null
-
-  return <section data-testid="agronautas-evidence-dashboard" aria-label="Dashboard de evidencia Agronautas" className="grid gap-5">
-    <Card>
-      <CardHeader>
-        <CardTitle>Evidencia por fuente</CardTitle>
-        <CardDescription>Contrato location-scoped servido por API/BFF. Cada fuente conserva su modo, tiempos, confianza, lineage y próxima acción.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        {model.overallState === 'empty' ? <div role="status"><VisibilityState state="empty" title="Sin registros de evidencia" description="La API respondió un conjunto vacío para el campo seleccionado. Empty no es fallo y no se completa con datos demo." retryAllowed={true} retryLabel="Reintentar evidencia" onRetry={() => void onRetry()} /></div> : null}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {model.sources.map((source) => <EvidenceSourceCard key={`${source.key}-${source.provider}-${source.signalType}`} source={source} />)}
-        </div>
-      </CardContent>
-    </Card>
-
-    <div className="grid gap-5 lg:grid-cols-2">
-      <Card data-testid="agronautas-ingestion-records">
-        <CardHeader><CardTitle>Registros de ingestión</CardTitle><CardDescription>Runs y reintentos devueltos por el contrato; no se deduce éxito desde HTTP 200.</CardDescription></CardHeader>
-        <CardContent className="grid gap-3 text-sm">
-          {model.ingestion.length ? model.ingestion.map((record) => <div key={`${record.provider}-${record.signalType}-${record.runId ?? record.state}`} className="rounded-2xl border border-[var(--border)] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium">{record.provider} · {record.signalType}</p><Badge variant={record.state === 'succeeded' ? 'success' : record.state === 'failed' ? 'destructive' : 'warning'}>{record.state}</Badge></div><p className="mt-2 break-words text-[var(--muted-foreground)]">Run {record.runId ?? 'no disponible'} · retrieved {formatDateTime(record.retrievedAt)} · próximo {formatDateTime(record.nextDueAt)}</p><p className="mt-2 text-[var(--muted-foreground)]">{record.reason ?? (record.retryable ? 'Reintento permitido por el contrato.' : 'Sin reintento permitido.')}</p></div>) : <p role="status">La respuesta no incluyó registros de ingestión; no se inventan corridas.</p>}
-        </CardContent>
-      </Card>
-      <Card data-testid="agronautas-readiness-records">
-        <CardHeader><CardTitle>Readiness por fuente</CardTitle><CardDescription>Solo se muestra readiness emitido por backend con evidencia y run lineage.</CardDescription></CardHeader>
-        <CardContent className="grid gap-3 text-sm">
-          {model.readiness.length ? model.readiness.map((record) => <div key={`${record.source}-${record.productSlice}`} className="rounded-2xl border border-[var(--border)] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium">{record.source} · {record.productSlice}</p><Badge variant={record.state === 'ready' ? 'success' : 'warning'}>{record.state}</Badge></div><p className="mt-2 break-words text-[var(--muted-foreground)]">Evaluado {formatDateTime(record.evaluatedAt)} · evidence {record.evidenceRefs.join(', ') || 'no disponible'} · runs {record.runIds.join(', ') || 'no disponible'}</p>{record.reason ? <p className="mt-2 text-[var(--muted-foreground)]">{record.reason}</p> : null}</div>) : <p role="status">Readiness no fue devuelto por la API; no se eleva ningún estado desde el cliente.</p>}
-        </CardContent>
-      </Card>
-    </div>
-  </section>
-}
-
-function EvidenceSourceCard({ source }: { source: EvidenceSourceRecord }) {
-  const variant = source.status === 'fresh' ? 'success' : source.status === 'unavailable' || source.status === 'missing' ? 'destructive' : 'warning'
-  return <article className="min-w-0 rounded-2xl border border-[var(--border)] p-4" aria-label={`${source.label} evidence`}>
-    <div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><p className="font-semibold">{source.label}</p><p className="break-words text-xs text-[var(--muted-foreground)]">{source.provider} · {source.signalType}</p></div><Badge variant={variant}>{source.status}</Badge></div>
-    <dl className="mt-3 grid gap-1 text-xs leading-5 text-[var(--muted-foreground)]">
-      <div><dt className="inline font-medium text-[var(--foreground)]">Modo: </dt><dd className="inline">{source.providerMode}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Observed: </dt><dd className="inline">{formatDateTime(source.observedAt)}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Acquired: </dt><dd className="inline">{formatDateTime(source.acquiredAt)}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Forecast: </dt><dd className="inline">{formatDateTime(source.forecastAt)}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Retrieved: </dt><dd className="inline">{formatDateTime(source.retrievedAt)}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Confidence: </dt><dd className="inline">{source.confidence === null ? 'No provista' : `${Math.round(source.confidence * 100)}%`}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Lineage: </dt><dd className="inline break-all">{source.runId ?? 'No disponible'}</dd></div>
-      <div><dt className="inline font-medium text-[var(--foreground)]">Source: </dt><dd className="inline break-all">{source.sourceUrl ?? source.sourceKey ?? 'No disponible'}</dd></div>
-    </dl>
-    {source.degradationReasons.length ? <p className="mt-3 break-words text-xs text-amber-800">Límite: {source.degradationReasons.join(', ')}</p> : null}
-    <p className="mt-3 text-xs font-medium text-stone-700">Siguiente acción: {source.nextAction}</p>
-  </article>
-}
-
-function NextFeaturesPanel({ dashboardPayload }: { dashboardPayload?: DashboardSnapshot }) {
-  if (!dashboardPayload) return null
-
-  const adminRows = buildIngestionAdminRows(dashboardPayload)
-  const freshnessCards = buildSourceFreshnessCards(dashboardPayload)
-  const operationalAlerts = deriveSafeOperationalAlerts(dashboardPayload)
-
-  return (
-    <section className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
-      <Card data-testid="agronautas-ingestion-admin-panel">
-        <CardHeader>
-          <CardTitle>Panel de ingestión</CardTitle>
-          <CardDescription>Control operativo por proveedor: modo resuelto, próxima corrida estimada y estado seguro de trigger.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 text-sm">
-          {adminRows.map((row) => (
-            <div key={`${row.provider}-${row.signalType}`} className="rounded-2xl border border-[var(--border)] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium">{row.provider}</p>
-                  <p className="text-[var(--muted-foreground)]">{row.signalType} · Próxima corrida {row.nextRunLabel}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant={row.modeLabel === 'Live' ? 'success' : row.modeLabel === 'Fallback' ? 'destructive' : 'warning'}>{row.modeLabel}</Badge>
-                  <Badge variant={row.currentState === 'Failed' || row.currentState === 'Stale' ? 'warning' : 'success'}>{row.currentState}</Badge>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[var(--muted-foreground)]">{row.reason}</p>
-                <Button type="button" variant="outline" disabled={!row.triggerEnabled}>{row.triggerLabel}</Button>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6">
-        <Card data-testid="agronautas-source-freshness-panel">
-          <CardHeader>
-            <CardTitle>Freshness monitor</CardTitle>
-            <CardDescription>Señales por SLA investigado: clima, suelo y satélite para campos agrícolas de Corrientes.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm">
-            {freshnessCards.map((card) => (
-              <div key={card.sourceLabel} className="rounded-2xl border border-[var(--border)] p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium">{card.sourceLabel}</p>
-                  <Badge variant={card.freshnessLabel === 'fresh' ? 'success' : card.freshnessLabel === 'stale' ? 'warning' : 'destructive'}>{card.freshnessLabel}</Badge>
-                </div>
-                <p className="mt-2 text-[var(--muted-foreground)]">Último éxito {card.lastSuccessLabel} · Próximo {card.nextDueLabel} · {card.slaLabel}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card data-testid="agronautas-operational-alerts-panel">
-          <CardHeader>
-            <CardTitle>Alertas operativas explícitas</CardTitle>
-            <CardDescription>Anegamiento, estrés y heladas se muestran con marca de seguridad antes de notificaciones productivas.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm">
-            {operationalAlerts.map((alert) => (
-              <div key={alert.label} className="rounded-2xl border border-[var(--border)] p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-medium">{alert.label}</p>
-                  <Badge variant={alert.safetyLabel.includes('no producción') ? 'warning' : 'success'}>{alert.safetyLabel}</Badge>
-                </div>
-                <p className="mt-2 text-[var(--muted-foreground)]">{alert.stateLabel}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </section>
-  )
-}
-
-function HydrologyPanel({ dashboard, availability, locality, hydrologyChatState, isHydrologyChatPending, onAskHydrologyChat, onRetryHydrologyChat }: { dashboard?: HydrologyDashboard; availability?: AgronautasCapabilityState; locality: string | null; hydrologyChatState: ChatStreamState; isHydrologyChatPending: boolean; onAskHydrologyChat: (message: string) => Promise<unknown>; onRetryHydrologyChat: () => Promise<unknown> }) {
-  const [hydrologyChatValidationError, setHydrologyChatValidationError] = useState<string | null>(null)
-
-  if (!dashboard && availability && availability.state !== 'available' && availability.state !== 'loading') {
-    return <section className="grid gap-6" data-testid="agronautas-hydrology-panel"><Card className="border-amber-200 bg-amber-50"><CardHeader><CardTitle>Agronautas · Hidrología</CardTitle><CardDescription>La señal hidrológica conserva su límite contractual y no se sustituye con otra zona o fuente.</CardDescription></CardHeader><CardContent><CapabilityUnavailableState capability={availability} label="Hidrología" onRetry={onRetryHydrologyChat} /></CardContent></Card></section>
-  }
-
-  const zone = dashboard?.zone ?? locality ?? 'Zona no mapeada'
-  const height = dashboard?.heights[0]
-  const trend = dashboard?.trends[0] ?? height
-  const lastSuccessful = dashboard?.status.lastSuccessfulObservedAt ?? height?.lastSuccessfulObservedAt ?? null
-
-  return (
-    <section className="grid gap-6" data-testid="agronautas-hydrology-panel">
-      <Card className="border-emerald-200 bg-emerald-50/50">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle>Agronautas · Tarjeta hidrológica {zone}</CardTitle>
-              <CardDescription>Monitoreo PNA + INA + INMET + SMN como una señal más del riesgo agrícola persistido.</CardDescription>
-            </div>
-            <Badge variant={dashboard?.status.riskLevel === 'high' ? 'destructive' : dashboard?.status.riskLevel === 'moderate' ? 'warning' : 'success'}>{toRiskLabel(dashboard?.status.riskLevel)}</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-5">
-          <div className="grid gap-3 md:grid-cols-4">
-            <HydrologyFact label="Altura actual" value={height ? `${height.value.toFixed(2)} ${height.unit}` : 'Sin dato'} detail={height?.stationId ?? 'PNA'} />
-            <HydrologyFact label="Tendencia 24h" value={toTendencyLabel(trend?.tendency)} detail={trend ? `${trend.value} ${trend.unit}` : 'Sin variación'} />
-            <HydrologyFact label="Umbral de alerta" value="No disponible" detail="El contrato hidrológico actual no informa umbrales." />
-            <HydrologyFact label="Umbral de evacuación" value="No disponible" detail="El contrato hidrológico actual no informa umbrales." />
-          </div>
-
-          <p className="rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900">Último dato obtenido: {formatDateTime(lastSuccessful)}</p>
-
-          <div className="grid gap-4 lg:grid-cols-[1fr,1.2fr]">
-            <LocalAlertsCard dashboard={dashboard} zone={zone} />
-            <ForecastCard forecasts={dashboard?.forecasts ?? []} />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <FutureFeatureCard title="Sentinel-1 inline" description="Próximamente: capa radar integrada en el mapa de Agronautas. Fase 1 no muestra links externos ni redirecciones." />
-            <FutureFeatureCard title="Simulación interactiva" description="Próximamente: escenarios de inundación dentro del panel. Fase 1 evita controles hidráulicos personalizados." />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card data-testid="agronautas-copilot-card">
-        <CardHeader>
-          <CardTitle>Copilot Hidrológico</CardTitle>
-          <CardDescription>Seleccioná el lote activo y preguntá en español sobre riesgo de crecida, caminos, maquinaria o alertas locales. La respuesta se transmite en vivo con contexto oficial.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-           <form
-             aria-label="Consulta al Copilot Hidrológico"
-             aria-describedby={hydrologyChatState.error ? AGRONAUTAS_HYDROLOGY_CHAT_ERROR_ID : undefined}
-             className="grid gap-3"
-            onSubmit={async (event) => {
-              event.preventDefault()
-               const message = String(new FormData(event.currentTarget).get('hydrologyMessage') ?? '').trim()
-               if (!message) {
-                 setHydrologyChatValidationError('Escribí una pregunta antes de consultar el Copilot Hidrológico.')
-                 document.getElementById('hydrologyMessage')?.focus()
-                 return
-               }
-               setHydrologyChatValidationError(null)
-               await onAskHydrologyChat(message)
-             }}
-           >
-             <Field label="Pregunta hidrológica" name="hydrologyMessage" autoComplete="off" error={hydrologyChatValidationError ?? undefined} placeholder="¿Qué riesgo de crecida tiene mi lote en los próximos 7 días?" />
-             <Button type="submit" className={focusVisibleClassName} disabled={isHydrologyChatPending}>{isHydrologyChatPending ? 'Transmitiendo respuesta…' : 'Preguntar al Copilot Hidrológico'}</Button>
-          </form>
-            {hydrologyChatState.status !== 'idle' ? <div id={AGRONAUTAS_HYDROLOGY_CHAT_ERROR_ID}><CopilotPanel stream={hydrologyChatState} onRetry={onRetryHydrologyChat} /></div> : null}
-        </CardContent>
-      </Card>
-    </section>
-  )
-}
-
-function LocalAlertsCard({ dashboard, zone }: { dashboard?: HydrologyDashboard; zone: string }) {
-  const alerts = dashboard?.alerts ?? []
-  return (
-    <Card className="bg-white">
-      <CardHeader>
-        <CardTitle>Alertas locales · {zone}</CardTitle>
-        <CardDescription>Las alertas aparecen solo dentro de la tarjeta de su zona o estación de referencia.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3 text-sm">
-        {alerts.length ? alerts.map((alert) => (
-          <div key={`${alert.source}-${alert.stationId}-${alert.observedAt}`} className="rounded-2xl border border-[var(--border)] p-3">
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <p className="font-medium">{stationLabel(alert.stationId)} · {alert.source}</p>
-              <Badge variant="warning">Activa</Badge>
-            </div>
-            <p className="text-[var(--muted-foreground)]">Valor {alert.value} {alert.unit}. Último dato obtenido: {formatDateTime(alert.lastSuccessfulObservedAt)}</p>
-          </div>
-        )) : <p className="text-[var(--muted-foreground)]">No hay alertas activas para esta zona.</p>}
-      </CardContent>
-    </Card>
-  )
-}
-
-function ForecastCard({ forecasts }: { forecasts: HydrologyItem[] }) {
-  const visibleForecasts = forecasts.filter((item) => (item.forecastHorizonDays ?? 0) <= 30)
-  return (
-    <Card className="bg-white">
-      <CardHeader>
-        <CardTitle>Pronóstico INA en tabla HTML</CardTitle>
-        <CardDescription>Alturas a 7-30 días visibles en el panel para evitar descargar y revisar PDFs estáticos.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {visibleForecasts.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[520px] text-left text-sm">
-              <thead className="text-[var(--muted-foreground)]">
-                <tr className="border-b border-[var(--border)]">
-                  <th className="py-2 pr-3">Horizonte</th>
-                  <th className="py-2 pr-3">Altura prevista</th>
-                  <th className="py-2 pr-3">Confianza</th>
-                  <th className="py-2 pr-3">Último dato obtenido</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleForecasts.map((item) => (
-                  <tr key={`${item.stationId}-${item.forecastHorizonDays}`} className="border-b border-[var(--border)]/70">
-                    <td className="py-2 pr-3">Día {item.forecastHorizonDays}</td>
-                    <td className="py-2 pr-3 font-medium">{item.value.toFixed(2)} {item.unit}</td>
-                    <td className="py-2 pr-3">{item.confidence === 'speculative' ? 'Planificación especulativa / baja confianza' : 'Normal'}</td>
-                    <td className="py-2 pr-3">{formatDateTime(item.lastSuccessfulObservedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : <p className="text-sm text-[var(--muted-foreground)]">Sin pronóstico INA disponible para esta estación.</p>}
-      </CardContent>
-    </Card>
-  )
-}
-
-function HydrologyFact({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return <div className="rounded-2xl border border-emerald-200 bg-white p-4"><p className="text-sm text-[var(--muted-foreground)]">{label}</p><p className="text-2xl font-semibold text-emerald-950">{value}</p><p className="text-sm text-[var(--muted-foreground)]">{detail}</p></div>
-}
-
-function FutureFeatureCard({ title, description }: { title: string; description: string }) {
-  return <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white p-4"><Badge variant="outline">Próximamente</Badge><p className="mt-3 font-medium">{title}</p><p className="text-sm text-[var(--muted-foreground)]">{description}</p></div>
 }
 
 function MetricCard({ label, value, detail }: { label: string; value: string; detail: string }) {

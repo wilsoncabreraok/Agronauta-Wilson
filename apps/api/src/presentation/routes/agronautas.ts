@@ -156,7 +156,7 @@ export function createAgronautasRouter(deps: Partial<AgronautasRouterDeps> = {})
       load: async (scope) => buildGroundedCopilotContext(scope, resolved),
     },
   })
-  const runtimeConfig = getAgronautasRuntimeConfig()
+  const runtimeConfig = getAgronautasRuntimeConfig(); console.log("MAINTENANCE_MODE IS:", runtimeConfig.maintenanceMode);
   const chatRateLimitMiddleware = createChatRateLimitMiddleware()
   const authScopeOptions = { service: resolved.authService, workspaceId: resolveRequestWorkspaceId, fieldId: resolveRequestFieldId }
   const requireRead = requireAgronautasScope('read', authScopeOptions)
@@ -506,7 +506,7 @@ export function createAgronautasRouter(deps: Partial<AgronautasRouterDeps> = {})
       const workspace = await getWorkspaceContext.execute(workspaceId)
       if (!workspace) return respondContractError(res, 404, 'INVALID_CONTRACT', 'Workspace not found')
       return res.json(await listWorkspaceFields.execute({ workspaceId, limit: parseLimit(req), cursor: typeof req.query['cursor'] === 'string' ? req.query['cursor'] : undefined }))
-    } catch {
+    } catch (err) { console.error("FIELDS_ERROR:", err); 
       return respondContractError(res, 503, 'INVALID_CONTRACT', 'Los lotes del workspace no están disponibles', undefined, true)
     }
   })
@@ -1315,7 +1315,7 @@ function requireFieldAccess(fieldRepository: FieldRepository, authService: Agron
 }
 
 function respondAuthFailure(res: Response, error: unknown) {
-  if (!(error instanceof AuthFailure)) return respondContractError(res, 503, 'AUTH_MAINTENANCE', 'Agronautas authentication maintenance is required', undefined, true)
+  console.error("AUTH_FAILURE_CATCH:", error); if (!(error instanceof AuthFailure)) return respondContractError(res, 503, 'AUTH_MAINTENANCE', 'Agronautas authentication maintenance is required', undefined, true)
   const code = error.code === AUTH_FAILURE_CODES.FORBIDDEN
     ? 'FORBIDDEN'
     : error.code === AUTH_FAILURE_CODES.UNMAPPED_RECORD
@@ -1338,15 +1338,14 @@ function readBearer(req: Request): string | null {
 
 function createConfiguredAuthService(): AgronautasAuthServicePort {
   try {
-    const runtimeConfig = getAgronautasRuntimeConfig()
+    const runtimeConfig = getAgronautasRuntimeConfig(); console.log("MAINTENANCE_MODE IS:", runtimeConfig.maintenanceMode);
     return new AgronautasAuthService(new PostgresAgronautasAuthRepository(), {
       secrets: resolveAuthSecrets(),
       redis: new RedisAgronautasAuthDenyStore(),
       redisRequired: true,
       protectedAccessEnabled: runtimeConfig.maintenanceMode !== true,
     })
-  } catch {
-    return {
+  } catch (err) { console.error("AUTH SETUP FAILED:", err); return {
        async authenticateAccessToken() { throw new AuthFailure(AUTH_FAILURE_CODES.AUTH_MAINTENANCE, 'Agronautas authentication is not configured') },
        async authenticateBffAssertion() { throw new AuthFailure(AUTH_FAILURE_CODES.AUTH_MAINTENANCE, 'Agronautas authentication is not configured') },
        async authorize() { throw new AuthFailure(AUTH_FAILURE_CODES.AUTH_MAINTENANCE, 'Agronautas authentication is not configured') },
@@ -1500,3 +1499,7 @@ function shouldUseDemoData(req: Request, fieldId: string, runtimeMode: ReturnTyp
 }
 
 export type { AgronautasRouterDeps }
+
+
+
+

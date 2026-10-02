@@ -158,77 +158,61 @@ function CopilotInteractivePage({ navItems }: { navItems: any }) {
   const [pending, setPending] = useState(false);
   const [streamData, setStreamData] = useState<any>(null);
 
-  const responseRiesgo = {
-     status: 'done',
-     answer: 'El lote seleccionado en Mercedes (Corrientes) presenta condiciones hidricas estables. La telemetria actual no indica riesgo inminente de estres termico ni anegamiento. Se recomienda mantener el plan de monitoreo satelital programado y revisar las previsiones de precipitaciones para la proxima semana, dado que los umbrales del INA se mantienen dentro de los niveles operativos normales.',
-     metadata: {}, facts: [], citations: ['Estacion Hidrologica Paso de los Libres', 'Satelite Sentinel-2', 'Modelo ECMWF de precipitacion'], trace: [], sources: ['INA', 'Open-Meteo', 'Sentinel'], limits: [], retryable: false
-  };
+  const responseLoteNorte = {
+       status: 'done',
+       answer: 'En el Lote Norte actualmente tenés sembradas 42.5 hectáreas de Arroz en estado estable. La hacienda se encuentra ubicada en el Potrero Sur, donde contás con un stock de 2 animales de raza Brangus (un toro reproductor de 735 kg y un novillo de 412 kg).',
+       metadata: {}, facts: [], citations: ['Gestión Agronómica', 'Registro de Hacienda Local'], trace: [], sources: ['Sistema Agronautas'], limits: [], retryable: false
+    };
 
-  const responsePotreroSur = {
-     status: 'done',
-     answer: 'En el Potrero Sur se encuentran 2 animales de raza Brangus: un Toro reproductor (Caravana AR-005) de 735 kg y un Novillo activo (AR-007) de 412 kg.',
-     metadata: {}, facts: [], citations: ['Registro de Hacienda Local'], trace: [], sources: ['Sistema Agronautas'], limits: [], retryable: false
-  };
+    const responseRiesgo = {
+       status: 'done',
+       answer: 'Te sugiero priorizar el Lote Sur (31.2 ha de Maíz). El sistema de monitoreo detectó un riesgo moderado en el cultivo por anomalías térmicas. ¿Querés que genere una orden de trabajo para que tu equipo recorra ese sector?',
+       metadata: {}, facts: [], citations: ['Satelite Sentinel-2', 'Módulo Agronómico'], trace: [], sources: ['Agronautas Core'], limits: [], retryable: false
+    };
 
-  const responseTratamiento = {
-     status: 'done',
-     answer: 'Si, actualmente tienes 1 animal en tratamiento: la vaca Cruza (Caravana AR-008) de 441 kg ubicada en el Potrero Este. Los otros 7 animales del rodeo (incluyendo las 2 vacas prenadas) presentan actividad normal.',
-     metadata: {}, facts: [], citations: ['Sensores IoT', 'Registro Sanitario'], trace: [], sources: ['IoT Network'], limits: [], retryable: false
-  };
+    const responseMarketplace = {
+       status: 'done',
+       answer: 'Analicé la red de Agronauta y encontré una oportunidad activa para tu zona: un lote de 70 cabezas de Toro Hereford Puro Registrado en Gualeguaychú, a un valor de USD 2.800 cada uno. ¿Querés que abra una pestaña nueva para enviar una Solicitud de Cotización?',
+       metadata: {}, facts: [], citations: ['Red Marketplace Agronautas'], trace: [], sources: ['Marketplace'], limits: [], retryable: false
+    };
 
-  const responseCultivos = {
-     status: 'done',
-     answer: 'Cuentas con 101.7 hectareas cultivadas en 3 lotes. El arroz (Norte) y la soja (Este) estan en estado normal, pero el maiz del Lote Sur (V6) requiere revision. Atencion: tienes una tarea atrasada desde el 30/09 (Monitorear malezas por Lucia Gomez).',
-     metadata: {}, facts: [], citations: ['Modulo Agronomia', 'Reporte de Tareas'], trace: [], sources: ['Sistema Agronautas'], limits: [], retryable: false
-  };
+    const responseStock = {
+       status: 'done',
+       answer: 'Atención con el inventario: te has quedado sin Herbicida Selectivo (0 Litros) y tu stock de Urea Granulada está por debajo del límite sugerido (450 kg restantes). Te sugiero buscar precios y reponer antes de comenzar aplicaciones.',
+       metadata: {}, facts: [], citations: ['Inventario Central'], trace: [], sources: ['Módulo Stock'], limits: [], retryable: false
+    };
 
-  const responseStock = {
-     status: 'done',
-     answer: 'Atencion con el stock critico: Te has quedado completamente sin Herbicida Selectivo (0 L, minimo 40 L) y la Urea Granulada esta baja (450 kg, minimo 600 kg). Deberias reponer antes de fertilizar el Lote Norte.',
-     metadata: {}, facts: [], citations: ['Inventario Central'], trace: [], sources: ['Modulo Stock'], limits: [], retryable: false
-  };
+    const responseDefault = {
+       status: 'done',
+       answer: 'Los parámetros generales de tu campo se encuentran estables. Podés consultarme sobre el estado de tus lotes, la distribución de la hacienda, el inventario de insumos o pedirme que busque oportunidades de compra en el Marketplace.',
+       metadata: {}, facts: [], citations: ['Análisis Global del Sistema'], trace: [], sources: ['AsesorIA Core'], limits: [], retryable: false
+    };
 
-  const responseMarketplace = {
-     status: 'done',
-     answer: 'Analice el Marketplace y actualmente hay 3 lotes nuevos de hacienda Brangus publicados cerca de tu zona. Quieres que prepare una Solicitud de Cotizacion (RFQ) por estos lotes?',
-     metadata: {}, facts: [], citations: ['Red Marketplace Agronautas'], trace: [], sources: ['Marketplace'], limits: [], retryable: false
-  };
+    const handleSubmit = (e: any) => {
+      e.preventDefault();
+      const msg = e.target.message.value.toLowerCase();
+      setPending(true);
+      setStreamData(null);
+      setTimeout(() => {
+        setPending(false);
+        if (msg.includes('lote norte') || msg.includes('vacas') || msg.includes('hacienda')) {
+          setStreamData(responseLoteNorte);
+        } else if (msg.includes('riesgo') || msg.includes('atencion') || msg.includes('atención') || msg.includes('sugerís') || msg.includes('sugeris')) {
+          setStreamData(responseRiesgo);
+        } else if (msg.includes('toros') || msg.includes('comprar') || msg.includes('marketplace') || msg.includes('oportunidad')) {
+          setStreamData(responseMarketplace);
+        } else if (msg.includes('stock') || msg.includes('insumos') || msg.includes('fertilizar') || msg.includes('urea') || msg.includes('herbicida')) {
+          setStreamData(responseStock);
+        } else {
+          setStreamData(responseDefault);
+        }
+      }, 1500);
+    };
 
-  const responseDefault = {
-     status: 'done',
-     answer: 'Los parametros generales de tu campo se encuentran estables. Puedes consultarme sobre el riesgo hidrico, el estado de tus cultivos, las alertas de stock, tu hacienda o buscar oportunidades en el marketplace.',
-     metadata: {}, facts: [], citations: ['Analisis Global del Sistema'], trace: [], sources: ['Agronautas Core'], limits: [], retryable: false
-  };
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    const msg = e.target.message.value.toLowerCase();
-    setPending(true);
-    setStreamData(null);
-    setTimeout(() => {
-      setPending(false);
-      if (msg.includes('potrero sur')) {
-        setStreamData(responsePotreroSur);
-      } else if (msg.includes('enferm') || msg.includes('tratamiento') || msg.includes('alerta') || msg.includes('salud')) {
-        setStreamData(responseTratamiento);
-      } else if (msg.includes('stock') || msg.includes('insumo') || msg.includes('urea') || msg.includes('herbicida')) {
-        setStreamData(responseStock);
-      } else if (msg.includes('cultivo') || msg.includes('atrasad') || msg.includes('tarea') || msg.includes('agronom')) {
-        setStreamData(responseCultivos);
-      } else if (msg.includes('marketplace') || msg.includes('comprar') || msg.includes('brangus') || msg.includes('publicacion')) {
-        setStreamData(responseMarketplace);
-      } else if (msg.includes('riesgo') || msg.includes('mercedes') || msg.includes('agua') || msg.includes('clima') || msg.includes('inundacion') || msg.includes('hidrico')) {
-        setStreamData(responseRiesgo);
-      } else {
-        setStreamData(responseDefault);
-      }
-    }, 2000);
-  };
-
-  return (
+    return (
       <ProductShell
         product="agronautas"
-        title="Copilot Inteligente"
+        title="AsesorIA Inteligente"
         headerVariant="landing"
         headerOverlay
         fullBleed
@@ -237,7 +221,7 @@ function CopilotInteractivePage({ navItems }: { navItems: any }) {
         <div className="relative isolate overflow-hidden bg-stone-950 pt-20 text-white">
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-cover bg-center opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, rgba(28,25,23,.8), rgba(28,25,23,.35)), url(/hero-copilot.jpg)' }} />
           <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-8 sm:py-16">
-            <h1 className="font-serif text-5xl font-semibold tracking-tight sm:text-6xl">Copilot Agronautas</h1>
+            <h1 className="font-serif text-5xl font-semibold tracking-tight sm:text-6xl">AsesorIA Agronauta</h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-stone-300 sm:text-lg">
               Asistente de inteligencia artificial conectado a la evidencia real de tus lotes. Analiza variables climaticas y agronomicas en lenguaje natural.
             </p>
@@ -246,14 +230,14 @@ function CopilotInteractivePage({ navItems }: { navItems: any }) {
         <div className="mx-auto max-w-4xl px-4 py-12">
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Copilot Hidrologico</CardTitle>
+              <CardTitle>Análisis de Datos y Mercado</CardTitle>
               <CardDescription>Escribe tu consulta sobre riesgo hidrico, estado de la hacienda o desarrollo de cultivos. La respuesta se transmite en vivo con contexto oficial.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="grid gap-3">
                   <textarea required name="message" className="flex min-h-[80px] w-full rounded-xl border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Escribe tu consulta aqui..." />
-                  <Button type="submit" disabled={pending}>{pending ? 'Procesando evidencia y generando respuesta...' : 'Preguntar al Copilot'}</Button>
+                  <Button type="submit" disabled={pending}>{pending ? 'Procesando evidencia y generando respuesta...' : 'Enviar consulta'}</Button>
                 </div>
               </form>
             </CardContent>

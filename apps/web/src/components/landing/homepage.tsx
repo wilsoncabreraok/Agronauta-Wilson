@@ -217,7 +217,7 @@ export function LandingHomepage({ initialShowSplash, initialSplashVisible = true
       {!showSplash ? (
         <main>
           <div className="min-h-screen overflow-x-hidden bg-white">
-          <motion.nav initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.5 }} className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 py-2 shadow-lg backdrop-blur-md' : 'bg-transparent py-4'}`}>
+          <motion.nav initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.5 }} className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 py-2 text-slate-800 shadow-lg backdrop-blur-md' : 'bg-transparent py-4 text-white'}`}>
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -227,7 +227,7 @@ export function LandingHomepage({ initialShowSplash, initialSplashVisible = true
 
                 <div className="hidden items-center gap-6 xl:gap-8 min-[1600px]:flex">
                   {navItems.map((item) => (
-                    <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className={`group relative whitespace-nowrap font-medium text-slate-600 transition-colors hover:text-emerald-600 ${focusRingClass}`}>
+                    <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className={`group relative whitespace-nowrap font-medium transition-colors hover:text-emerald-400 ${scrolled ? 'text-slate-600 hover:text-emerald-600' : 'text-white'} ${focusRingClass}`}>
                       {item}
                       <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-emerald-500 transition-all group-hover:w-full" />
                     </a>
@@ -236,7 +236,7 @@ export function LandingHomepage({ initialShowSplash, initialSplashVisible = true
                 </div>
 
                 <button type="button" aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMobileMenuOpen((current) => !current)} className={`rounded-lg bg-white/10 p-2 backdrop-blur-sm min-[1600px]:hidden ${focusRingClass}`}>
-                  {mobileMenuOpen ? <X className="text-slate-800" size={24} /> : <Menu className="text-slate-800" size={24} />}
+                  {mobileMenuOpen ? <X className={scrolled ? 'text-slate-800' : 'text-white'} size={24} /> : <Menu className={scrolled ? 'text-slate-800' : 'text-white'} size={24} />}
                 </button>
               </div>
             </div>
@@ -270,7 +270,7 @@ export function LandingHomepage({ initialShowSplash, initialSplashVisible = true
               <div className="bg-grid-pattern absolute inset-0 opacity-20" />
             </div>
 
-            <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
+            <div className="relative z-10 flex min-h-screen items-center justify-center px-4 pb-8 pt-24 sm:pt-28">
               <motion.div key={heroAnimateKey} style={{ opacity, scale }} className="mx-auto max-w-5xl text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 backdrop-blur-sm sm:mb-8 sm:px-4 sm:py-2">

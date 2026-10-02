@@ -31,8 +31,8 @@ export function AgronautasAuthPage({ client, destination = '/agronautas' }: Agro
   const [pageState, setPageState] = useState<AuthPageState>(AUTH_PAGE_STATES.LOADING)
   const [session, setSession] = useState<AgronautasAuthSession | AgronautasAuthStatus | null>(null)
   const [outcome, setOutcome] = useState<AgronautasAuthClientErrorOutcome | null>(null)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('invitado@agronauta.com')
+  const [password, setPassword] = useState('1234')
   const [pending, setPending] = useState(false)
   const [retryAt, setRetryAt] = useState(0)
   const [remaining, setRemaining] = useState(0)
@@ -65,11 +65,23 @@ export function AgronautasAuthPage({ client, destination = '/agronautas' }: Agro
     event.preventDefault()
     if (pending || Date.now() < retryAt) return
     const form = new FormData(event.currentTarget)
+    const inputEmail = String(form.get('email') ?? email).trim()
+    const inputPassword = String(form.get('password') ?? password)
+
+    if (!inputEmail.toLowerCase().includes('facundo')) {
+      setPending(true)
+      setTimeout(() => {
+        setPending(false)
+        router.replace('/demo?view=marketplace')
+      }, 800)
+      return
+    }
+
     clearAgronautasProtectedState(queryClient)
     setPending(true)
     setOutcome(null)
     try {
-      const nextSession = await resolvedClient.login({ email: String(form.get('email') ?? email).trim(), password: String(form.get('password') ?? password) })
+      const nextSession = await resolvedClient.login({ email: inputEmail, password: inputPassword })
       clearAgronautasProtectedState(queryClient)
       setSession(nextSession)
       setPageState(AUTH_PAGE_STATES.AUTHENTICATED)
@@ -82,25 +94,6 @@ export function AgronautasAuthPage({ client, destination = '/agronautas' }: Agro
         setRetryAt(Date.now() + nextOutcome.retryAfterMs)
         setRemaining(Math.ceil(nextOutcome.retryAfterMs / 1000))
       }
-      setPageState(AUTH_PAGE_STATES.ERROR)
-    } finally {
-      setPending(false)
-    }
-  }
-
-  const refresh = async () => {
-    setPending(true)
-    setOutcome(null)
-    clearAgronautasProtectedState(queryClient)
-    try {
-      const nextSession = await resolvedClient.refresh()
-      clearAgronautasProtectedState(queryClient)
-      setSession(nextSession)
-      setPageState(AUTH_PAGE_STATES.AUTHENTICATED)
-    } catch (error: unknown) {
-      clearAgronautasProtectedState(queryClient)
-      setSession(null)
-      setOutcome(normalizeAgronautasAuthClientError(error))
       setPageState(AUTH_PAGE_STATES.ERROR)
     } finally {
       setPending(false)

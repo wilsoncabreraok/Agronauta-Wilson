@@ -8,7 +8,7 @@ import type {
   AgronautasMarketplaceRfqResponse,
 } from '@/lib/agronautas/schemas'
 import { MarketplaceCatalog } from './catalog'
-import { MessageCircle, ClipboardList, Check } from 'lucide-react'
+import { MessageCircle, ClipboardList, Check, Sprout } from 'lucide-react'
 import { MarketplaceRfqForm } from './rfq-form'
 import { MarketplaceRfqHistory } from './rfq-history'
 import { MarketplaceProductDetail, MarketplacePricePreview } from './product-detail'
@@ -60,7 +60,8 @@ export function MarketplaceCatalogRfq({
   const resolvedWorkspaceId =
     workspaceId ?? listings.items[0]?.workspaceId ?? rfqs.items[0]?.workspaceId ?? ''
   const [selectedListing, setSelectedListing] = useState<AgronautasMarketplaceListing | null>(null)
-  const [isMutating, setIsMutating] = useState(false)
+  const [isMutating, setIsMutating] = useState(false);
+  const [currentTab, setCurrentTab] = useState<'explorar' | 'mis_publicaciones' | 'mis_consultas'>('explorar');
 
   const submit = async (
     input: Parameters<typeof onSubmit>[0]
@@ -98,7 +99,15 @@ export function MarketplaceCatalogRfq({
     : undefined
   const showExample = publicPreview || accessState === 'unauthorized' || (available && scoped.length === 0)
   return (
-    <div className="mkt-layout">
+    
+    <div className="mkt-wrapper" style={{ padding: "0 20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ padding: '0 0 20px', borderBottom: '1px solid #e7e5e4', marginBottom: '24px', display: 'flex', gap: '24px' }}>
+        <button onClick={() => setCurrentTab('explorar')} style={{ paddingBottom: '8px', borderBottom: currentTab === 'explorar' ? '2px solid #059669' : '2px solid transparent', color: currentTab === 'explorar' ? '#064e3b' : '#78716c', fontWeight: 600 }}>🏪 Explorar</button>
+        <button onClick={() => setCurrentTab('mis_publicaciones')} style={{ paddingBottom: '8px', borderBottom: currentTab === 'mis_publicaciones' ? '2px solid #059669' : '2px solid transparent', color: currentTab === 'mis_publicaciones' ? '#064e3b' : '#78716c', fontWeight: 600 }}>📦 Mis Publicaciones</button>
+        <button onClick={() => setCurrentTab('mis_consultas')} style={{ paddingBottom: '8px', borderBottom: currentTab === 'mis_consultas' ? '2px solid #059669' : '2px solid transparent', color: currentTab === 'mis_consultas' ? '#064e3b' : '#78716c', fontWeight: 600 }}>💬 Mis Consultas</button>
+      </div>
+      <div className="mkt-layout" style={{ display: currentTab === 'explorar' ? 'grid' : 'none' }}>
+
       <div className="mkt-main-column">
         {activeListing || showExample ? (
           <MarketplaceProductDetail listing={activeListing} />
@@ -120,19 +129,7 @@ export function MarketplaceCatalogRfq({
             }}
           />
         )}
-        {!publicPreview && !accessState ? (
-          <div id="mis-consultas">
-            <MarketplaceRfqHistory
-              workspaceId={resolvedWorkspaceId}
-              response={rfqs}
-              isLoading={historyLoading ?? isLoading}
-              isMutating={isMutating}
-              error={historyError}
-              onRetry={() => void (onHistoryRetry ?? onRetry)()}
-              onCancel={cancel}
-            />
-          </div>
-        ) : null}
+        
       </div>
       <aside className="mkt-sidebar" aria-label="Consulta y ayuda">
         {activeListing ? (
@@ -188,11 +185,60 @@ export function MarketplaceCatalogRfq({
             <p>Enviar una consulta no confirma una compra ni genera un pago.</p>
           </div>
         </section>
-        <a className="mkt-history-link" href="#mis-consultas">
-          <ClipboardList size={18} aria-hidden="true" />
-          Ver mis consultas
-        </a>
+        
       </aside>
+
+      </div>
+      {currentTab === 'mis_publicaciones' && (
+        <div style={{ padding: '24px', background: '#fff', borderRadius: '12px', border: '1px solid #e7e5e4' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#0c2319', marginBottom: '24px' }}>Panel de Ventas</h2>
+          {scoped.filter(item => item.participantRef === 'yo').length === 0 ? (
+            <p style={{ color: '#78716c' }}>Todavia no publicaste nada. Usa el boton "Nueva Publicacion" para empezar a vender!</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {scoped.filter(item => item.participantRef === 'yo').map(item => {
+                const priceMatch = item.title.match(/USD \d+(?:\.\d+)?|\$\d+(?:\.\d+)?/i);
+                const priceStr = priceMatch ? priceMatch[0] : 'Precio a consultar';
+                return (
+                <div key={item.listingId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid #e7e5e4', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#f5f5f4', backgroundImage: (item as any).__frontendImages ? `url(${(item as any).__frontendImages[0]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {!(item as any).__frontendImages && <Sprout size={24} color="#a8a29e" />}
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.125rem', color: '#0c2319' }}>{item.itemName}</h3>
+                      <p style={{ margin: 0, color: '#78716c', fontSize: '0.875rem' }}>{priceStr} - {item.quantity} {item.unit}</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ textAlign: 'right', marginRight: '16px' }}>
+                      <p style={{ margin: 0, fontSize: '0.875rem', color: '#059669', fontWeight: 600 }}>Activa</p>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#78716c' }}>3 consultas recibidas</p>
+                    </div>
+                    <button style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #e7e5e4', background: '#fff', fontWeight: 500, cursor: 'pointer' }}>Pausar</button>
+                    <button style={{ padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#059669', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>Marcar Vendido</button>
+                  </div>
+                </div>
+              )})}
+            </div>
+          )}
+        </div>
+      )}
+      {currentTab === 'mis_consultas' && (
+        <div style={{ padding: '24px', background: '#fff', borderRadius: '12px', border: '1px solid #e7e5e4' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#0c2319', marginBottom: '24px' }}>Mis Consultas</h2>
+          <MarketplaceRfqHistory
+            workspaceId={resolvedWorkspaceId}
+            response={rfqs}
+            isLoading={historyLoading ?? isLoading}
+            isMutating={isMutating}
+            error={historyError}
+            onRetry={() => void (onHistoryRetry ?? onRetry)()}
+            onCancel={cancel}
+          />
+        </div>
+      )}
     </div>
+
   )
 }

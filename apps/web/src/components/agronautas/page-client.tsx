@@ -48,7 +48,7 @@ function resolveAccessState(runtimeQuery: { data?: { mode?: string }; error: unk
   const authError = authQuery.error
   if (authError) return resolveAccessError(authError)
   if (scopeTransitioning) return { state: 'loading' }
-  if (!isDemo && (authQuery.isPending || authQuery.isFetching || !authQuery.data)) return { state: 'loading' }
+  if (!isDemo && (authQuery.isPending || !authQuery.data)) return { state: 'loading' }
   if (boundaryError) return resolveAccessError(boundaryError)
 
   const error = runtimeQuery.error ?? workspaceQuery.error
@@ -81,8 +81,8 @@ export function AgronautasPageClient({ service, authClient, mode, initialFieldId
     queryKey: ['agronautas', 'auth-status'],
     queryFn: () => resolvedAuthClient.status(),
     enabled: !isDemo,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 300000,
+    refetchOnMount: false,
     retry: false,
   })
   const authScope: AgronautasAuthScope | null = authQuery.data?.principal ?? null
@@ -114,7 +114,7 @@ export function AgronautasPageClient({ service, authClient, mode, initialFieldId
   const [isPlanningMutating, setIsPlanningMutating] = useState(false)
   const [lastPlanningRequest, setLastPlanningRequest] = useState<{ kind: 'context' | 'simulation'; input: { campaignName: string; season: string; fieldIds: string[] } | Parameters<AgronautasService['simulateAssumptions']>[0] } | null>(null)
   const authReady = isDemo || Boolean(authQuery.data && !authQuery.isFetching && !authQuery.error)
-  const workspaceQuery = useQueries({ queries: [{ queryKey: queryKey('workspace'), queryFn: () => resolvedService.getWorkspace(), enabled: authReady, retry: false, meta: queryMeta }] })[0]
+  const workspaceQuery = useQueries({ queries: [{ queryKey: queryKey('workspace'), queryFn: () => resolvedService.getWorkspace(), enabled: authReady, staleTime: 300000, retry: false, meta: queryMeta }] })[0]
   const fieldsQuery = useInfiniteQuery<AgronautasWorkspaceFieldPage, Error, InfiniteData<AgronautasWorkspaceFieldPage, string | undefined>, readonly unknown[], string | undefined>({
     queryKey: queryKey('workspace-fields', workspaceQuery.data?.workspaceId),
     queryFn: ({ pageParam }) => resolvedService.listWorkspaceFields(workspaceQuery.data?.workspaceId ?? '', pageParam),
@@ -346,7 +346,7 @@ export function AgronautasPageClient({ service, authClient, mode, initialFieldId
     await simulateAssumptions(lastPlanningRequest.input as Parameters<AgronautasService['simulateAssumptions']>[0])
   }
   const runtimeQuery = useQueries({
-    queries: [{ queryKey: queryKey('runtime'), queryFn: () => resolvedService.getRuntime(), enabled: authReady, retry: false, meta: queryMeta }],
+    queries: [{ queryKey: queryKey('runtime'), queryFn: () => resolvedService.getRuntime(), enabled: authReady, staleTime: 300000, retry: false, meta: queryMeta }],
   })[0]
   // A source/evidence outage is rendered as a scoped recovery state by the
   // evidence panel. It must not become a workspace auth boundary, otherwise a

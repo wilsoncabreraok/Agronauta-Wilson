@@ -1,5 +1,7 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
+import { createPortal } from 'react-dom'
 import { createElement, Fragment, useRef, useState, type InputHTMLAttributes } from 'react'
 import type { FieldIntake } from '@repo/zod-schemas'
 import { agronautasSupportedCrops } from '@repo/zod-schemas'
@@ -12,9 +14,11 @@ import { EvidenceStateBadge, FreshnessBanner, MapFrame, StatusBadge, MetricCard 
 import { FutureCapabilities } from '@/components/visibility/future-capabilities'
 import type { ChatStreamState } from '@/lib/visibility/chat'
 import type { AgronautasCanonicalLocation } from '@/lib/agronautas/schemas'
+import { CheckCircle2, ImagePlus, MapPin } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
@@ -28,6 +32,8 @@ import { LivestockPanel } from './livestock/livestock-panel'
 import { AgronomyPanel } from './agronomy/agronomy-panel'
 import { PlanningPanel } from './planning-panel'
 import { CopilotPanel } from './copilot-panel'
+import { MarketplaceRouteClient } from '@/components/marketplace/route-client'
+import '@/components/marketplace/marketplace.css'
 import { EvidencePanel } from './evidence-panel'
 import { IntelligencePanel } from './intelligence-panel'
 import { buildWorkspaceHref, DEMO_WORKSPACE_VIEWS, OPERATIONAL_WORKSPACE_VIEWS, type OperationalWorkspaceView } from './workspace-navigation'
@@ -550,31 +556,231 @@ function MockedFieldsCRUD() {
   );
 }
 
+
+
+function PublicarVentaModal() {
+  const [open, setOpen] = useState(false);
+  const [mainCategory, setMainCategory] = useState("");
+  const [selectedCrop, setSelectedCrop] = useState("");
+  const [raza, setRaza] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+
+  const handleSelectCrop = (crop, defaultPrice) => {
+    setSelectedCrop(crop);
+    setPrice(defaultPrice);
+    setLocation("Potrero Sur (Lat: -34.5, Lng: -58.4)");
+  };
+
+  const handlePublish = () => {
+    
+      const isHacienda = mainCategory === "hacienda";
+      const itemName = isHacienda ? ("Hacienda " + raza + " - " + categoria) : selectedCrop;
+      if (!itemName || !quantity) return;
+      
+      const frontendDetails = isHacienda ? [
+        ['Raza', raza || 'No especificada'],
+        ['Categoria', categoria || 'No especificada'],
+        ['Cantidad', quantity + ' cabezas'],
+        ['Peso', 'Consultar'],
+        ['Ubicacion', localityQuery || 'Consultar']
+      ] : [
+        ['Cultivo', selectedCrop],
+        ['Cantidad', quantity + ' tn'],
+        ['Ubicacion', localityQuery || 'Consultar']
+      ];
+
+      queryClient.setQueriesData({ queryKey: ["agronautas", "marketplace", "listings"] }, (old) => {
+        if (!old) return old;
+        const newListing = {
+          contractVersion: "agronautas-marketplace-v1",
+          listingId: "lst_" + Date.now(),
+          workspaceId: old.items?.[0]?.workspaceId || "workspace-demo",
+          marketId: "mkt-verificado",
+          participantRef: "yo",
+          itemName: itemName,
+          title: itemName + (price ? " - USD " + price : ""),
+          availabilityStatus: "available",
+          availabilityAt: new Date().toISOString(),
+          quantity: Number(quantity),
+          unit: isHacienda ? "cabezas" : "tn",
+          qualityStatus: "verified",
+          provenance: { type: "official" },
+          freshnessExpiresAt: new Date(Date.now() + 30*86400000).toISOString(),
+          updatedAt: new Date().toISOString(),
+          __frontendImages: photos,
+          __frontendDetails: frontendDetails,
+          __frontendDescription: description || 'Sin descripcion detallada enviada.'
+        };
+
+      return { ...old, items: [newListing, ...old.items] };
+    });
+    setOpen(false);
+    setMainCategory("");
+    setSelectedCrop("");
+    setRaza("");
+    setCategoria("");
+    setQuantity("");
+    setPrice("");
+    setLocation("");
+    setDescription("");
+  };
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-0">
+      <div className="w-full max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+        <h2 className="text-2xl font-serif text-emerald-950 mb-1">Publicar Venta</h2>
+        <p className="text-sm text-stone-500 mb-6">Completa los datos. Tu historial satelital certificara la calidad.</p>
+        
+        <div className="flex flex-col gap-6">
+          <div className="space-y-3">
+            <Label className="text-stone-700 font-bold">Que vas a publicar?</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <Button type="button" variant={mainCategory === "agricultura" ? "default" : "outline"} onClick={() => { setMainCategory("agricultura"); setSelectedCrop(""); setPrice(""); }} className={mainCategory === "agricultura" ? "bg-amber-500 hover:bg-amber-600 border-transparent" : "border-stone-300"}>
+                Agricultura
+              </Button>
+              <Button type="button" variant={mainCategory === "hacienda" ? "default" : "outline"} onClick={() => { setMainCategory("hacienda"); setRaza(""); setCategoria(""); setPrice(""); }} className={mainCategory === "hacienda" ? "bg-stone-800 hover:bg-stone-900 text-white border-transparent" : "border-stone-300"}>
+                Hacienda
+              </Button>
+            </div>
+          </div>
+
+          {mainCategory === "agricultura" && (
+            <div className="space-y-3 animate-in slide-in-from-top-2">
+              <Label className="text-stone-700 font-semibold">Selecciona el cultivo</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant={selectedCrop === "Maiz" ? "default" : "outline"} onClick={() => handleSelectCrop("Maiz", "185/tn")} className={selectedCrop === "Maiz" ? "bg-amber-500 hover:bg-amber-600" : ""}>Maiz</Button>
+                <Button type="button" variant={selectedCrop === "Soja" ? "default" : "outline"} onClick={() => handleSelectCrop("Soja", "410/tn")} className={selectedCrop === "Soja" ? "bg-emerald-600 hover:bg-emerald-700" : ""}>Soja</Button>
+                <Button type="button" variant={selectedCrop === "Trigo" ? "default" : "outline"} onClick={() => handleSelectCrop("Trigo", "220/tn")} className={selectedCrop === "Trigo" ? "bg-amber-600 hover:bg-amber-700" : ""}>Trigo</Button>
+              </div>
+            </div>
+          )}
+
+          {mainCategory === "hacienda" && (
+            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+              <div className="space-y-2">
+                <Label className="text-stone-700 font-semibold">Categoria</Label>
+                <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="flex h-10 w-full rounded-md border border-stone-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">Seleccionar...</option>
+                  <option value="Terneros">Terneros</option>
+                  <option value="Novillos">Novillos</option>
+                  <option value="Vaquillonas">Vaquillonas</option>
+                  <option value="Vacas">Vacas</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-stone-700 font-semibold">Raza</Label>
+                <select value={raza} onChange={(e) => setRaza(e.target.value)} className="flex h-10 w-full rounded-md border border-stone-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">Seleccionar...</option>
+                  <option value="Angus">Angus</option>
+                  <option value="Brangus">Brangus</option>
+                  <option value="Braford">Braford</option>
+                  <option value="Hereford">Hereford</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {mainCategory && (
+            <>
+              <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                <div className="space-y-2">
+                  <Label className="text-stone-700 font-semibold">{mainCategory === "hacienda" ? "Cantidad (Cabezas)" : "Cantidad (Tn)"}</Label>
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder={mainCategory === "hacienda" ? "Ej. 70" : "Ej. 1500"} className="border-stone-300 focus:border-emerald-500" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-stone-700 font-semibold">Precio Referencia</Label>
+                  <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder={mainCategory === "hacienda" ? "Ej. 1200/cbz" : "Ej. 185/tn"} className="border-stone-300 focus:border-emerald-500" />
+                </div>
+              </div>
+              
+              <div className="space-y-2 animate-in slide-in-from-top-2">
+                <Label className="text-stone-700 font-semibold">Ubicacion del Lote</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-stone-400" />
+                  <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Selecciona el lote o ingresa coordenadas" className="pl-9 border-stone-300 focus:border-emerald-500" />
+                </div>
+              </div>
+
+              <div className="space-y-2 animate-in slide-in-from-top-2">
+                <Label className="text-stone-700 font-semibold">Descripcion adicional</Label>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej. Plazos de pago, estado corporal, detalles de entrega..." rows={3} className="flex w-full rounded-md border border-stone-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
+              </div>
+              
+              <div className="space-y-2 animate-in slide-in-from-top-2">
+                <Label className="text-stone-700 font-semibold">Fotos del producto</Label>
+                {photos.length > 0 ? (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {photos.map((p, i) => <img key={i} src={p} className="h-24 w-24 object-cover rounded-lg border border-stone-200" alt="Preview" />)}
+                    <label className="h-24 min-w-24 w-24 flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 text-emerald-600 cursor-pointer hover:bg-emerald-50">
+                      <ImagePlus className="h-5 w-5" />
+                      <span className="text-[10px] font-medium">Mas fotos</span>
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { const files = Array.from(e.target.files); setPhotos([...photos, ...files.map(f => URL.createObjectURL(f))]); }} />
+                    </label>
+                  </div>
+                ) : (
+                  <label className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 py-4 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 transition-colors cursor-pointer">
+                    <ImagePlus className="h-8 w-8 opacity-80" />
+                    <span className="text-sm font-medium">Subir fotos (Opcional)</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { const files = Array.from(e.target.files); setPhotos(files.map(f => URL.createObjectURL(f))); }} />
+                  </label>
+                )}
+              </div>
+              
+              <div className="rounded-xl bg-stone-50 p-4 border border-stone-200 flex gap-3 animate-in slide-in-from-top-2">
+                <CheckCircle2 className="text-emerald-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-stone-800">
+                  <p className="font-semibold text-emerald-900">Trazabilidad Agronautas</p>
+                  <p className="opacity-90 mt-1 leading-relaxed text-stone-600">Tus datos satelitales certifican la calidad del producto.</p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        
+        <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-stone-100">
+          <Button variant="outline" className="border-stone-300 text-stone-700" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6" onClick={handlePublish} disabled={!mainCategory || !quantity}>Publicar Ahora</Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold shadow-lg shadow-emerald-900/20">
+        + Nueva Publicacion
+      </Button>
+      {open && typeof document !== "undefined" ? createPortal(modalContent, document.body) : null}
+    </>
+  );
+}
 export function AgronautasWorkspace(props: WorkspaceProps) {
   if (props.accessState === 'unauthorized') {
     return (
-      <ProductShell product="agronautas" title="Agronautas" description="Inici� sesi�n para acceder a tu workspace." navItems={[]}>
+      <ProductShell product="agronautas" title="Agronautas" description="Inicia sesion para acceder a tu workspace." navItems={[]}>
         <div className="mx-auto mt-20 max-w-xl rounded-3xl border border-stone-200 bg-white p-10 text-center shadow-lg">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
             <svg className="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
-          <h2 className="text-3xl font-serif font-semibold text-stone-900">Ingres� a tu cuenta</h2>
+          <h2 className="text-3xl font-serif font-semibold text-stone-900">Ingresa a tu cuenta</h2>
           <p className="mt-4 text-base leading-6 text-stone-600">
-            El acceso a esta secci�n es privado. Inici� sesi�n para gestionar tus campos, analizar inteligencia y acceder a todas las herramientas de Agronautas.
+            El acceso a esta seccion es privado. Inicia sesion para gestionar tus campos, analizar inteligencia y acceder a todas las herramientas de Agronautas.
           </p>
-          <a href="/login?next=/agronautas" className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-600 px-8 py-3 text-lg font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
-            Iniciar sesi�n
-          </a>
+          <a href="/login?next=/agronautas" className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-600 px-8 py-3 text-lg font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"> Iniciar sesion </a>
         </div>
       </ProductShell>
     )
   }
 
-  if (props.accessState === 'loading') {
-    return <ProductShell product="agronautas" title="Workspace Agronautas" description="Verificando el acceso controlado al workspace Agronautas." navItems={[]}><div className="mx-auto max-w-4xl px-4 py-12"><VisibilityState state="loading" title="Verificando autenticación Agronautas" description="Confirmando la sesión y el workspace antes de mostrar datos protegidos." retryAllowed={false} /></div></ProductShell>
-  }
+  
 
   if (props.accessState === 'forbidden') {
     return <ProductShell product="agronautas" title="Workspace Agronautas" description="Acceso restringido al workspace Agronautas." navItems={[]}><div className="mx-auto max-w-4xl px-4 py-12"><VisibilityState state="forbidden" title="Acceso Agronautas restringido" description={`Tu sesión no tiene permisos para este workspace (HTTP 403). Consultá al administrador para solicitar acceso.`} /></div></ProductShell>
@@ -603,7 +809,49 @@ export function AgronautasWorkspace(props: WorkspaceProps) {
     )
   }
 
-  if (props.workspaceView === 'livestock') {
+  if (props.workspaceView === 'marketplace') {
+      return (
+        <div className="responsive-shell min-h-screen bg-stone-100 text-stone-950" data-product="agronautas">
+          <ProductHeader product="agronautas" variant="landing" navItems={operationalNavItems} />
+          <main id="main-content" tabIndex={-1}>
+            <header className="relative isolate overflow-hidden bg-emerald-950 pt-20 text-white">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 -z-10 bg-cover bg-center"
+                style={{
+                  backgroundImage: "linear-gradient(90deg, rgba(12,35,25,.8), rgba(12,35,25,.35)), url('/marketplace/marketplace-hero.jpg')",
+                  backgroundPosition: "center 65%",
+                }}
+              />
+              <div className="mx-auto flex min-h-[320px] max-w-[1440px] flex-col justify-center px-4 py-12 sm:min-h-[360px] sm:px-8 sm:py-16">
+                <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">
+                  EL CAMPO, MAS CERCA
+                </p>
+                <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-6xl">
+                  Marketplace Agronautas
+                </h1>
+                <p className="mt-5 max-w-xl text-base leading-7 text-stone-100 sm:text-lg">
+                  Encontra productos para tu campo y consulta lo que necesitas.</p><div className='mt-8 flex gap-4'><PublicarVentaModal /></div></div></header>
+            <div className="marketplace-view">
+              <div className="mkt-container">
+                <MarketplaceRouteClient />
+              </div>
+              <footer className="mkt-footer">
+                <strong>Agronautas</strong>
+                <span>Un punto de encuentro para el campo.</span>
+              </footer>
+            </div>
+          </main>
+        </div>
+      )
+    }
+
+
+  if (props.workspaceView === 'copilot') {
+      return <CopilotInteractivePage navItems={operationalNavItems} />
+    }
+
+    if (props.workspaceView === 'livestock') {
     return (
       <div className="min-h-screen bg-stone-100 text-stone-950">
         <ProductHeader product="agronautas" variant="landing" navItems={operationalNavItems} />
@@ -620,7 +868,7 @@ export function AgronautasWorkspace(props: WorkspaceProps) {
       title="Workspace Agronautas"
       headerVariant="landing" headerOverlay fullBleed
       description="De la ubicación del lote a una decisión verificable: cobertura por punto, nivel de riesgo, siguiente acción y evidencia contratada."
-       navItems={isDemo ? operationalNavItems : [{ href: '#agronautas-intake', label: 'Nuevo lote' }, ...operationalNavItems, { href: '#agronautas-dashboard', label: 'Decisión' }, { href: '#agronautas-alerts', label: 'Alertas' }, { href: '#agronautas-timeline', label: 'Timeline' }]}
+       navItems={operationalNavItems}
     >
     <div className="relative isolate overflow-hidden bg-emerald-950 pt-20 text-white"><div aria-hidden="true" className="absolute inset-0 -z-10 bg-cover bg-center opacity-30" style={{ backgroundImage: "linear-gradient(90deg, rgba(12,35,25,.8), rgba(12,35,25,.35)), url(/hero-tractor.webp)" }} /><div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-8 sm:py-16"><div className="mb-6 flex flex-wrap items-center gap-3 text-xs"><span className="font-semibold uppercase tracking-[0.22em] text-emerald-200">Workspace Piloto</span><span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">Agronautas</span></div><h1 className="font-serif text-5xl font-semibold tracking-tight sm:text-6xl">{ "Gestion de campos" }</h1><p className="mt-5 max-w-xl text-base leading-7 text-stone-100 sm:text-lg">{ "Administra todos tus lotes, monitorea cultivos y controla la informacion base desde un solo lugar." }</p></div></div><div className="agronautas-canvas mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 rounded-[2rem] px-4 py-8 md:px-8">
       

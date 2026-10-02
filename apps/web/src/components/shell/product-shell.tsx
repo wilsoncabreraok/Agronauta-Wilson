@@ -89,9 +89,7 @@ export function ProductHeader({
 }) {
   const copy = productCopy[product]
   const resolvedNavItems =
-    product === 'agronautas' && !navItems.some((item) => item.href === '/agronautas/marketplace')
-      ? [...navItems, { href: '/agronautas/marketplace', label: 'Marketplace' }]
-      : navItems
+    navItems
   if (variant === 'landing') {
     const loginHref = resolvedNavItems.some((item) => item.active && item.href === '/agronautas/marketplace')
       ? '/login?next=marketplace'

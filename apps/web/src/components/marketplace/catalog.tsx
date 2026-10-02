@@ -29,7 +29,8 @@ export function MarketplaceCatalog({
   selectedId,
 }: MarketplaceCatalogProps) {
   const [search, setSearch] = useState('')
-  const [marketId, setMarketId] = useState('all')
+  const [marketId, setMarketId] = useState('all');
+  const [locationId, setLocationId] = useState('all');
   if (accessState)
     return (
       <MarketplaceNotice
@@ -89,10 +90,17 @@ export function MarketplaceCatalog({
       </div>
     )
   const markets = [...new Set(scoped.map((item) => item.marketId))]
+  const locations = [...new Set(scoped.map((item: any) => {
+    const detail = item.__frontendDetails?.find((d: any) => d[0] === 'Ubicación' || d[0] === 'Ubicacin');
+    return detail ? detail[1] : '';
+  }).filter(Boolean))]
   const visible = scoped.filter(
-    (item) =>
-      (marketId === 'all' || item.marketId === marketId) &&
-      `${item.title} ${item.itemName}`.toLowerCase().includes(search.trim().toLowerCase())
+    (item: any) => {
+      const itemLoc = item.__frontendDetails?.find((d: any) => d[0] === 'Ubicación' || d[0] === 'Ubicacin')?.[1] || '';
+      return (marketId === 'all' || item.marketId === marketId) &&
+             (locationId === 'all' || itemLoc === locationId) &&
+             `${item.title} ${item.itemName}`.toLowerCase().includes(search.trim().toLowerCase());
+    }
   )
   return (
     <section
@@ -135,6 +143,19 @@ export function MarketplaceCatalog({
             ))}
           </select>
         </label>
+          <label>
+            <span>Ubicación</span>
+            <select
+              aria-label="Filtrar por ubicación"
+              value={locationId}
+              onChange={(event) => setLocationId(event.target.value)}
+            >
+              <option value="all">Todas las zonas</option>
+              {locations.map((loc: any) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </label>
       </div>
       {response.staleListingCount > 0 ? (
         <p className="mkt-muted">Las publicaciones vencidas ya no aparecen en este listado.</p>
@@ -154,17 +175,28 @@ export function MarketplaceCatalog({
               aria-pressed={selectedId === item.listingId}
               aria-label={`Ver publicación: ${item.title}`}
             >
-              <div className="mkt-card-image">
-                <Sprout size={44} strokeWidth={1.25} aria-hidden="true" />
-                <span>Sin foto cargada</span>
-              </div>
-              <div className="mkt-card-body">
-                <h3>{item.title}</h3>
-                <strong>
-                  {item.quantity === null
-                    ? 'Cantidad a consultar'
-                    : `${item.quantity.toLocaleString('es-AR')} ${item.unit ?? ''}`}
-                </strong>
+              {(item as any).__frontendImages && (item as any).__frontendImages.length > 0 ? (
+                  <div className="mkt-card-image" style={{ backgroundImage: `url(${(item as any).__frontendImages[0]})`, backgroundSize: 'cover', backgroundPosition: 'center', height: '180px', borderRadius: '12px 12px 0 0', flexShrink: 0 }} />
+                ) : (
+                  <div className="mkt-card-image">
+                    <Sprout size={48} strokeWidth={1} aria-hidden="true" />
+                  </div>
+                )}
+              <div className="mkt-card-body" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: '#0c2319', margin: 0, fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.title}</h3>
+                  <strong style={{ fontSize: '0.9rem', color: '#44403c', fontWeight: 500 }}>
+                    {item.quantity === null
+                      ? 'Cantidad a consultar'
+                      : item.quantity.toLocaleString('es-AR') + ' ' + (item.unit ?? '')}
+                  </strong>
+                  {(() => {
+                    const loc = (item as any).__frontendDetails?.find((d: any) => d[0] === 'Ubicación')?.[1];
+                    return loc ? (
+                      <span style={{ fontSize: '0.8rem', color: '#78716c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MapPin size={12} /> {loc}
+                      </span>
+                    ) : null;
+                  })()}
                 <p>
                   <MapPin size={14} aria-hidden="true" />
                   {marketName(item.marketId)}

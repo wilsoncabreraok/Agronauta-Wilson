@@ -9,6 +9,7 @@ const WORKSPACE_VIEW_VALUES = {
   EVIDENCE: 'evidence',
   INTELLIGENCE: 'intelligence',
   COPILOT: 'copilot',
+  MARKETPLACE: 'marketplace',
 } as const
 
 export type OperationalWorkspaceView =
@@ -18,7 +19,8 @@ export const OPERATIONAL_WORKSPACE_VIEWS = [
   { key: WORKSPACE_VIEW_VALUES.FIELDS, label: 'Campos', anchor: 'agronautas-intake' },
   { key: WORKSPACE_VIEW_VALUES.LIVESTOCK, label: 'Hacienda', anchor: 'agronautas-livestock' },
   { key: WORKSPACE_VIEW_VALUES.AGRONOMY, label: 'Agronomia', anchor: 'agronautas-agronomy' },
-  { key: WORKSPACE_VIEW_VALUES.COPILOT, label: 'Copilot', anchor: 'agronautas-copilot' }
+  { key: WORKSPACE_VIEW_VALUES.COPILOT, label: 'Copilot', anchor: 'agronautas-copilot' },
+  { key: WORKSPACE_VIEW_VALUES.MARKETPLACE, label: 'Marketplace', anchor: 'agronautas-marketplace' }
 ] as const
 
 export const DEMO_WORKSPACE_VIEWS = OPERATIONAL_WORKSPACE_VIEWS
@@ -26,7 +28,7 @@ export const DEMO_WORKSPACE_VIEWS = OPERATIONAL_WORKSPACE_VIEWS
 export function buildWorkspaceHref(
   view: OperationalWorkspaceView,
   fieldId?: string | null,
-  basePath = '/agronautas'
+  basePath = '/demo'
 ): string {
   if (view === 'agronomy') basePath = '/demo'
   const params = new URLSearchParams({ view })

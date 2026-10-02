@@ -27,8 +27,24 @@ export function MarketplaceRfqForm({
   const [quantity, setQuantity] = useState('1')
   const [unit, setUnit] = useState(listing.unit ?? '')
   const [locality, setLocality] = useState('')
+  const [offerPrice, setOfferPrice] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+
+  const priceMatch = listing?.title?.match(/USD \d+(?:\.\d+)?(?:\/\w+)?|\$\d+(?:\.\d+)?(?:\/\w+)?/i);
+  const priceStr = priceMatch ? priceMatch[0] : 'A consultar';
+  
+  let estimatedTotal = 0;
+  let hasPrice = false;
+  if (priceStr && priceStr !== 'A consultar') {
+    const rawNum = offerPrice.trim() !== '' ? offerPrice.replace(/[^\d.]/g, '') : priceStr.replace(/[^\d.]/g, '');
+    const unitPrice = parseFloat(rawNum);
+    const qty = parseFloat(quantity);
+    if (!isNaN(unitPrice) && !isNaN(qty)) {
+      estimatedTotal = unitPrice * qty;
+      hasPrice = true;
+    }
+  }
 
   const submit = async () => {
     const parsedQuantity = Number(quantity)
@@ -54,7 +70,7 @@ export function MarketplaceRfqForm({
         itemName: listing.itemName,
         quantity: parsedQuantity,
         unit: normalizedUnit,
-        locality: normalizedLocality,
+        locality: normalizedLocality + (offerPrice.trim() ? ` | Oferta: USD ${offerPrice.trim()}` : ''),
         idempotencyKey: `rfq-${listing.listingId}-${normalizedLocality.toLowerCase()}-${parsedQuantity}-${normalizedUnit.toLowerCase()}`,
         participantRefs: [listing.participantRef],
       })
@@ -99,18 +115,35 @@ export function MarketplaceRfqForm({
               onInput={(event) => setQuantity(event.currentTarget.value)}
             />
           </label>
-          <label htmlFor="rfq-unit">
-            Unidad
-            <input
-              id="rfq-unit"
-              aria-label="Unidad solicitada"
-              placeholder="Ej.: kg, cabezas"
-              value={unit}
-              onChange={(event) => setUnit(event.target.value)}
-              onInput={(event) => setUnit(event.currentTarget.value)}
-            />
-          </label>
-        </div>
+                      <label htmlFor="rfq-unit">
+              Unidad
+              <input
+                id="rfq-unit"
+                aria-label="Unidad"
+                value={listing.unit ?? ''}
+                readOnly
+                disabled
+              />
+            </label>
+          </div>
+          
+          <div className="mkt-form-row" style={{ marginTop: '16px' }}>
+            <label htmlFor="rfq-offer" style={{ width: '100%' }}>
+              <span style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', color: '#44403c', fontWeight: 500 }}>Contraoferta (USD)</span>
+              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #d6d3d1', borderRadius: '8px', padding: '0 12px', background: '#fff', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)', transition: 'border-color 0.2s' }}>
+                <span style={{ color: '#78716c', paddingRight: '8px', borderRight: '1px solid #e7e5e4', fontWeight: 500 }}>$</span>
+                <input
+                  id="rfq-offer"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="2700"
+                  style={{ border: 'none', padding: '10px 0 10px 12px', flex: 1, outline: 'none', fontSize: '1rem', color: '#0c2319', width: '100%' }}
+                  value={offerPrice}
+                  onChange={(e) => setOfferPrice(e.target.value.replace(/[^\d]/g, ''))}
+                  />
+              </div>
+            </label>
+          </div>
         <label htmlFor="rfq-locality">
           ¿Dónde lo necesitás?
           <input
@@ -122,9 +155,21 @@ export function MarketplaceRfqForm({
             onInput={(event) => setLocality(event.currentTarget.value)}
           />
         </label>
-        <div className="mkt-quote-note">
-          <span>Precio y forma de entrega</span>
-          <strong>A confirmar con la consulta</strong>
+        <div className="mkt-quote-note" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#44403c' }}>{hasPrice ? 'Precio de referencia' : 'Precio y entrega'}</span>
+            <strong style={{ fontSize: hasPrice ? '1.1rem' : undefined, color: hasPrice ? '#0c2319' : undefined }}>
+              {hasPrice ? priceStr : 'A confirmar'}
+            </strong>
+          </div>
+          {hasPrice && estimatedTotal > 0 && (
+            <div style={{ paddingTop: '8px', borderTop: '1px dashed #d6d3d1' }}>
+              <span>Total Estimado</span>
+              <strong style={{ fontSize: '1.4rem', color: '#059669', display: 'block', marginTop: '2px' }}>
+                USD {estimatedTotal.toLocaleString('es-AR')}
+              </strong>
+            </div>
+          )}
         </div>
         <button type="submit" className="mkt-button" disabled={isSubmitting}>
           {isSubmitting ? 'Enviando…' : 'Enviar consulta'}

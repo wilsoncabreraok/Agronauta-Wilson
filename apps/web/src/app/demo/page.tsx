@@ -24,6 +24,7 @@ export default async function DemoPage({
     'evidence',
     'intelligence',
     'copilot',
+    'marketplace',
   ] as const
 
   const view = supportedViews.includes(

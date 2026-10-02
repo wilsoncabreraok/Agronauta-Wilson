@@ -10,8 +10,30 @@ const money = (value: number) =>
   value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
 
 export function MarketplaceProductDetail({ listing }: { listing?: AgronautasMarketplaceListing }) {
-  const demo = !listing
-  const title = listing?.title ?? '70 vaquillonas para madre'
+  const demo = !listing;
+  const priceMatch = listing?.title?.match(/USD \d+(?:\.\d+)?(?:\/\w+)?|\$\d+(?:\.\d+)?(?:\/\w+)?/i);
+  const priceStr = priceMatch ? priceMatch[0] : 'A consultar';
+
+  const [calcMethod, setCalcMethod] = useState('canje');
+  const [calcResult, setCalcResult] = useState<{ total: number, message: string } | null>(null);
+
+  const handleCalculate = () => {
+    if (priceStr === 'A consultar') return;
+    const basePrice = parseFloat(priceStr.replace(/[^\d.]/g, ''));
+    if (isNaN(basePrice)) return;
+
+    if (calcMethod === 'canje') {
+      setCalcResult({ total: basePrice * 0.95, message: 'Incluye 5% de descuento por pago con granos.' });
+    } else if (calcMethod === 'cheque') {
+      setCalcResult({ total: basePrice * 1.10, message: 'Incluye 10% de recargo por financiación a 90 días.' });
+    } else if (calcMethod === 'galicia') {
+      setCalcResult({ total: basePrice * 1.20, message: 'Incluye 20% de interés anual por pago con Galicia Rural.' });
+    } else if (calcMethod === 'agronacion') {
+      setCalcResult({ total: basePrice * 1.20, message: 'Incluye 20% de interés anual por pago con Agronación.' });
+    }
+  };
+
+  const title = (listing?.title ?? '70 vaquillonas para madre').replace(/ - (USD|\$)\s*\d+(?:\.\d+)?(?:\/\w+)?/i, '')
   const facts = demo
     ? [
         ['Cantidad', '70 cabezas'],
@@ -51,31 +73,51 @@ export function MarketplaceProductDetail({ listing }: { listing?: AgronautasMark
           <span className="mkt-badge">{demo ? 'Vista de ejemplo' : 'Ficha de producto'}</span>
         </div>
         <h2>{title}</h2>
-        <p>{demo ? 'Hereford · recría a campo' : listing.itemName}</p>
-      </div>
-      {demo ? (
-        <div
-          className="mkt-product-cover"
-          role="img"
-          aria-label="Foto del lote de 70 vaquillonas en el campo"
-        >
-          <span className="mkt-photo-label">70 vaquillonas · Foto del lote</span>
-          <div>
-            <MapPin size={18} aria-hidden="true" />
-            <span>
-              Mercedes, Corrientes <small>Ubicación de la tropa</small>
-            </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', color: '#57534e', fontSize: '1rem' }}>
+            <span>{demo ? 'Hereford – recría a campo' : listing.itemName}</span>
+            {(() => {
+              const loc = (listing as any).__frontendDetails?.find((d: any) => d[0] === 'Ubicación' || d[0] === 'Ubicacin')?.[1];
+              return loc ? (
+                <>
+                  <span style={{ color: '#d6d3d1' }}>|</span>
+                  <MapPin size={16} style={{ color: '#059669' }} />
+                  <span>{loc}</span>
+                </>
+              ) : null;
+            })()}
           </div>
-        </div>
-      ) : (
-        <div className="mkt-product-image">
-          <Sprout size={76} strokeWidth={1} aria-hidden="true" />
-          <span>Esta publicación todavía no tiene fotos</span>
-          <span>
-            <MapPin size={14} aria-hidden="true" /> {marketName(listing.marketId)}
-          </span>
-        </div>
-      )}
+      </div>
+      {listing && (listing as any).__frontendImages && (listing as any).__frontendImages.length > 0 ? (
+          <div
+            className="mkt-product-cover"
+            role="img"
+            style={{ background: `linear-gradient(0deg, rgba(12, 30, 20, 0.75), transparent 35%), url(${(listing as any).__frontendImages[0]}) center/cover` }}
+          >
+            <div>
+              <MapPin size={18} aria-hidden="true" />
+              <span>{listing.provenance?.type === 'official' ? 'Mkt verificado' : 'Ubicación a confirmar'}</span>
+            </div>
+            {listing.availabilityStatus === 'available' && <small>Disponible ahora</small>}
+          </div>
+        ) : demo ? (
+          <div
+            className="mkt-product-cover"
+            role="img"
+            aria-label="Foto del lote de 70 vaquillonas en el campo"
+          >
+            <span className="mkt-photo-label">70 vaquillonas - Foto del lote</span>
+            <div>
+              <MapPin size={18} aria-hidden="true" />
+              <span>Gualeguaychú, Entre Ríos</span>
+            </div>
+            <small>Disponible en 15 días</small>
+          </div>
+        ) : (
+          <div className="mkt-product-image">
+            <Sprout size={76} strokeWidth={1} aria-hidden="true" />
+            <span>Esta publicación todavía no tiene fotos</span>
+          </div>
+        )}
       <dl className="mkt-product-specs">
         {facts.map(([label, value]) => (
           <div key={label}>
@@ -87,21 +129,59 @@ export function MarketplaceProductDetail({ listing }: { listing?: AgronautasMark
       {listing && (
         <div className="mkt-product-section">
           <span className="mkt-eyebrow">PRECIO</span>
-          <h3>A consultar</h3>
-          <p>
-            Solicitá una cotización por la cantidad que necesitás. El vendedor no informó un precio
-            en esta publicación.
-          </p>
-        </div>
-      )}
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0c2319', marginBottom: '8px' }}>{priceStr}</h3>
+            <p style={{ color: '#44403c' }}>
+              {priceStr === 'A consultar' 
+                ? 'Solicitá una cotización por la cantidad que necesitás. El vendedor no informó un precio explícito.'
+                : 'Precio de referencia indicado por el vendedor. Solicitá una cotización para confirmar condiciones comerciales.'}
+            </p>
+          </div>)}
+        
+        {/* CALCULADORA DE CUOTAS */}
+        {priceStr !== 'A consultar' && (
+          <div style={{ marginTop: '24px', padding: '16px', borderRadius: '8px', border: '1px solid #e7e5e4', background: '#fcfcfb' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
+              <h4 style={{ margin: 0, fontSize: '1rem', color: '#0c2319', fontWeight: 600 }}>Simulador de financiación</h4>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <select 
+                value={calcMethod}
+                onChange={(e) => setCalcMethod(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d6d3d1', flex: 1, color: '#0c2319' }}
+              >
+                <option value="canje">Canje Cereal (Cosecha)</option>
+                <option value="cheque">Cheque Pago Diferido (90d)</option>
+                <option value="galicia">Tarjeta Galicia Rural</option>
+                <option value="agronacion">Tarjeta Agronación</option>
+              </select>
+              <button 
+                onClick={handleCalculate}
+                style={{ padding: '8px 16px', background: '#0c2319', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 500, cursor: 'pointer' }}
+              >
+                Calcular
+              </button>
+            </div>
+            
+            {calcResult ? (
+              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px' }}>
+                <strong style={{ fontSize: '1.25rem', color: '#065f46', display: 'block' }}>Total a Pagar: USD {calcResult.total.toLocaleString('es-AR')}</strong>
+                <span style={{ fontSize: '0.85rem', color: '#047857', marginTop: '4px', display: 'block' }}>Detalle: {calcResult.message}</span>
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.85rem', color: '#78716c', margin: '12px 0 0 0' }}>Simulá tus pagos con las principales herramientas de financiación del agro.</p>
+            )}
+          </div>
+        )}
+
       <div className="mkt-product-section">
         <h3>Descripción del producto</h3>
         <p>
           {demo
-            ? 'Lote parejo de 70 vaquillonas Hereford, recriadas a campo sobre praderas y verdeos. Una propuesta de ejemplo para visualizar la información que acompañaría una publicación ganadera.'
-            : 'La publicación identifica el producto como ' +
-              listing.itemName +
-              '. El vendedor todavía no agregó una descripción ampliada. Consultá las características y condiciones antes de avanzar.'}
+              ? 'Lote parejo de 70 vaquillonas Hereford, recriadas a campo sobre praderas y verdeos. Una propuesta de ejemplo para visualizar la información que acompañaría una publicación ganadera.'
+              : ((listing as any).__frontendDescription ? (listing as any).__frontendDescription : 'La publicación identifica el producto como ' +
+                listing.itemName +
+                '. El vendedor todavía no agregó una descripción ampliada. Consultá las características y condiciones antes de avanzar.')}
         </p>
         {demo && (
           <div className="mkt-product-tags">
@@ -158,7 +238,7 @@ export function MarketplaceProductDetail({ listing }: { listing?: AgronautasMark
             ? 'Todos los datos de esta ficha son ficticios.'
             : 'Actualizado el ' + marketDate(listing.updatedAt)}
         </span>
-        <span>{demo ? 'Referencia DEMO-070' : 'Precio y entrega: a consultar'}</span>
+        <span>{demo ? 'Referencia DEMO-070' : `Precio: ${priceStr}`}</span>
       </div>
       {!demo && (
         <a className="mkt-button mkt-mobile-consult" href="#marketplace-consult">

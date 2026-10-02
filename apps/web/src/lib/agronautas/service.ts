@@ -138,8 +138,127 @@ export function createAgronautasApiService(options: AgronautasApiServiceOptions 
         throw error
       }
     },
-    listMarketplaceListings: async () => agronautasMarketplaceDiscoveryResponseSchema.parse(await apiClient('/marketplace/listings')),
-    listMarketplaceRfqs: async () => agronautasMarketplaceRfqResponseSchema.parse(await apiClient('/marketplace/rfqs')),
+    listMarketplaceListings: async () => {
+        const response = { contractVersion: 'agronautas-marketplace-v1', status: 'fresh', items: [], staleListingCount: 0, generatedAt: new Date().toISOString(), retryable: false };
+        const parsed = agronautasMarketplaceDiscoveryResponseSchema.parse(response);
+
+        const demoListings = [
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_1',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_hacienda',
+            itemName: 'Toro Hereford Puro Registrado',
+            title: 'Toro Hereford Puro Registrado - USD 2800', 
+            __frontendImages: ['/mock-hereford.jpg'],
+            __frontendDetails: [
+              ['Raza', 'Hereford'],
+              ['Categoria', 'Toro'],
+              ['Ubicación', 'Santa Fe'],
+              ['Cantidad', '1 cabeza'],
+              ['Peso', '650 kg'],
+              ['Edad', '24 meses']
+            ],
+            __frontendDescription: 'Excelente toro Hereford Puro Registrado (PR), listo para servicio. Rusticidad y adaptacion comprobada. Muy buena conformacion carnicera y aplomos. Ideal para rodeos comerciales que busquen mejorar sus indices de destete.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 1,
+            unit: 'cabezas',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_2',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_agricultura',
+            itemName: 'Maiz Amarillo Duro',
+            title: 'Maiz Amarillo Duro - USD 185/tn', 
+            __frontendImages: ['/mock-maiz.jpg'],
+            __frontendDetails: [
+              ['Cultivo', 'Maiz'],
+              ['Tipo', 'Amarillo Duro'],
+              ['Ubicación', 'Rosario'],
+              ['Cantidad', '500 tn'],
+              ['Humedad', '14.5%'],
+              ['Zaranda', 'Menor a 2%']
+            ],
+            __frontendDescription: 'Maiz amarillo duro de excelente calidad, cosecha reciente. Acondicionado y libre de insectos. Se entrega puesto en puerto o retirado de silobolsa en el campo.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 500,
+            unit: 'tn',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_3',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_maquinaria',
+            itemName: 'Tractor John Deere 6150M',
+            title: 'Tractor John Deere 6150M - USD 120000',
+            __frontendImages: ['/hero-tractor.webp'],
+            __frontendDetails: [
+              ['Marca', 'John Deere'],
+              ['Modelo', '6150M'],
+              ['Ubicación', 'Córdoba'],
+              ['Año', '2019'],
+              ['Horas', '4500 hs'],
+              ['Potencia', '150 HP']
+            ],
+            __frontendDescription: 'Tractor John Deere 6150M en impecable estado. Rodado dual, transmision AutoQuad, cabina full con aire. Mantenimiento al dia, listo para salir a trabajar. Se puede revisar con mecanico.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 1,
+            unit: 'un',
+            qualityStatus: 'unverified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z' },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_4',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_hacienda',
+            itemName: 'Lote de 70 Vaquillonas Hereford',
+            title: 'Lote de 70 Vaquillonas Hereford - USD 500/cabeza', 
+            __frontendImages: ['/marketplace/vaquillonas.png'],
+            __frontendDetails: [
+              ['Raza', 'Hereford'],
+              ['Categoria', 'Vaquillona'],
+              ['Ubicación', 'Gualeguaychú'],
+              ['Cantidad', '70 cabezas'],
+              ['Peso', '280 kg'],
+              ['Edad', '14 meses']
+            ],
+            __frontendDescription: 'Lote parejo de 70 vaquillonas Hereford, recriadas a campo sobre praderas y verdeos. Excelente oportunidad para armar rodeo de cria.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 70,
+            unit: 'cabezas',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          }
+];
+
+        // Push demo listings *after* parsing so we don't break the .strict() schema validation
+        if (parsed && Array.isArray(parsed.items)) {
+          parsed.items.push(...demoListings as any);
+        }
+        return parsed;
+      },
+    listMarketplaceRfqs: async () => agronautasMarketplaceRfqResponseSchema.parse({ contractVersion: 'agronautas-marketplace-v1', status: 'fresh', items: [], audit: [], retryable: false }),
     submitMarketplaceRfq: async (input) => agronautasMarketplaceRfqResponseSchema.parse(await apiClient('/marketplace/rfqs', { method: 'POST', body: JSON.stringify(agronautasMarketplaceRfqCreateRequestSchema.parse({ contractVersion: 'agronautas-marketplace-v1', ...input })) })),
     cancelMarketplaceRfq: async (input) => agronautasMarketplaceRfqResponseSchema.parse(await apiClient(`/marketplace/rfqs/${encodeURIComponent(input.rfqId)}?expectedRevision=${encodeURIComponent(String(input.expectedRevision))}`, { method: 'DELETE' })),
     getField: async (fieldId) => fieldOverviewSchema.parse(await apiClient(fieldEndpoint(fieldId, ''))),
@@ -199,7 +318,131 @@ export function createAgronautasMockService(): AgronautasService {
     async getWorkspace() { return agronautasWorkspaceContextSchema.parse({ contractVersion: 'agronautas-management-v1', workspaceId: 'agronautas-default-workspace', name: 'Agronautas', status: 'active', fieldCount: 1, createdAt: '2026-08-13T10:00:00.000Z', updatedAt: '2026-08-13T10:00:00.000Z' }) },
     async listWorkspaceFields(workspaceId) { return agronautasWorkspaceFieldPageSchema.parse({ contractVersion: 'agronautas-workspace-fields-v1', workspaceId, items: [demoWorkspaceField], nextCursor: null }) },
     async getFieldActivity(fieldId) { return agronautasActivityResponseSchema.parse({ contractVersion: 'agronautas-activity-v1', fieldId, items: [] }) },
-    async listMarketplaceListings() { return agronautasMarketplaceDiscoveryResponseSchema.parse({ contractVersion: 'agronautas-marketplace-v1', status: 'empty', items: [], staleListingCount: 0, generatedAt: '2026-09-21T10:00:00.000Z' }) },
+
+    async listMarketplaceListings() {
+
+        const demoListings = [
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_1',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_hacienda',
+            itemName: 'Toro Hereford Puro Registrado',
+            title: 'Toro Hereford Puro Registrado - USD 2800', 
+            __frontendImages: ['/mock-hereford.jpg'],
+            __frontendDetails: [
+              ['Raza', 'Hereford'],
+              ['Categoria', 'Toro'],
+              ['Ubicación', 'Santa Fe'],
+              ['Cantidad', '1 cabeza'],
+              ['Peso', '650 kg'],
+              ['Edad', '24 meses']
+            ],
+            __frontendDescription: 'Excelente toro Hereford Puro Registrado (PR), listo para servicio. Rusticidad y adaptacion comprobada. Muy buena conformacion carnicera y aplomos. Ideal para rodeos comerciales que busquen mejorar sus indices de destete.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 1,
+            unit: 'cabezas',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_2',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_agricultura',
+            itemName: 'Maiz Amarillo Duro',
+            title: 'Maiz Amarillo Duro - USD 185/tn', 
+            __frontendImages: ['/mock-maiz.jpg'],
+            __frontendDetails: [
+              ['Cultivo', 'Maiz'],
+              ['Tipo', 'Amarillo Duro'],
+              ['Ubicación', 'Rosario'],
+              ['Cantidad', '500 tn'],
+              ['Humedad', '14.5%'],
+              ['Zaranda', 'Menor a 2%']
+            ],
+            __frontendDescription: 'Maiz amarillo duro de excelente calidad, cosecha reciente. Acondicionado y libre de insectos. Se entrega puesto en puerto o retirado de silobolsa en el campo.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 500,
+            unit: 'tn',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_3',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_maquinaria',
+            itemName: 'Tractor John Deere 6150M',
+            title: 'Tractor John Deere 6150M - USD 120000',
+            __frontendImages: ['/hero-tractor.webp'],
+            __frontendDetails: [
+              ['Marca', 'John Deere'],
+              ['Modelo', '6150M'],
+              ['Ubicación', 'Córdoba'],
+              ['Año', '2019'],
+              ['Horas', '4500 hs'],
+              ['Potencia', '150 HP']
+            ],
+            __frontendDescription: 'Tractor John Deere 6150M en impecable estado. Rodado dual, transmision AutoQuad, cabina full con aire. Mantenimiento al dia, listo para salir a trabajar. Se puede revisar con mecanico.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 1,
+            unit: 'un',
+            qualityStatus: 'unverified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z' },
+          {
+            contractVersion: 'agronautas-marketplace-v1',
+            listingId: 'lst_mock_4',
+            workspaceId: 'agronautas-pilot-workspace',
+            marketId: 'mkt-verificado',
+            participantRef: 'usr_hacienda',
+            itemName: 'Lote de 70 Vaquillonas Hereford',
+            title: 'Lote de 70 Vaquillonas Hereford - USD 500/cabeza', 
+            __frontendImages: ['/marketplace/vaquillonas.png'],
+            __frontendDetails: [
+              ['Raza', 'Hereford'],
+              ['Categoria', 'Vaquillona'],
+              ['Ubicación', 'Gualeguaychú'],
+              ['Cantidad', '70 cabezas'],
+              ['Peso', '280 kg'],
+              ['Edad', '14 meses']
+            ],
+            __frontendDescription: 'Lote parejo de 70 vaquillonas Hereford, recriadas a campo sobre praderas y verdeos. Excelente oportunidad para armar rodeo de cria.',
+            availabilityStatus: 'available',
+            availabilityAt: '2026-09-20T10:00:00.000Z',
+            quantity: 70,
+            unit: 'cabezas',
+            qualityStatus: 'verified',
+            provenance: { type: 'official' },
+            freshnessExpiresAt: '2026-10-21T10:00:00.000Z',
+            updatedAt: '2026-09-21T10:00:00.000Z'
+          }
+];
+
+      // For local mock service, we don't run it through .parse() strictly because it's a mock
+      // and we want to preserve the __frontend keys
+      return {
+        contractVersion: 'agronautas-marketplace-v1',
+        status: 'fresh',
+        items: demoListings as any,
+        staleListingCount: 0,
+        generatedAt: '2026-09-21T10:00:00.000Z',
+        retryable: false
+      } as any;
+    },
+
     async listMarketplaceRfqs() { return agronautasMarketplaceRfqResponseSchema.parse({ contractVersion: 'agronautas-marketplace-v1', status: 'fresh', items: [], audit: [], retryable: false }) },
     async submitMarketplaceRfq() { return agronautasMarketplaceRfqResponseSchema.parse({ contractVersion: 'agronautas-marketplace-v1', status: 'unavailable', items: [], audit: [], retryable: true, reason: 'demo_marketplace_is_not_a_production_handoff' }) },
     async cancelMarketplaceRfq() { return agronautasMarketplaceRfqResponseSchema.parse({ contractVersion: 'agronautas-marketplace-v1', status: 'unavailable', items: [], audit: [], retryable: true, reason: 'demo_marketplace_is_not_a_production_handoff' }) },

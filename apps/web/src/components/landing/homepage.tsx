@@ -3,7 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
@@ -49,6 +49,8 @@ const imagen5 = '/landing/source/imagen5.webp'
 const imagen6 = '/landing/source/imagen6.webp'
 const imagen7 = '/landing/source/imagen7.webp'
 const image1 = '/landing/source/image1.webp'
+const prototipoImg1 = '/landing/source/prototipoImg1.webp'
+const videoPrototipo = '/landing/source/videoPrototipo.mp4'
 const focusRingClass =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500'
 
@@ -327,6 +329,7 @@ const platformPillars = [
     icon: Globe,
     title: 'Marketplace B2B',
     desc: 'Productores y compradores conectados para publicar oportunidades, cotizar, negociar y coordinar operaciones.',
+    href: '/demo?view=marketplace',
   },
 ]
 
@@ -339,6 +342,7 @@ export function LandingHomepage({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [heroAnimateKey, setHeroAnimateKey] = useState(0)
   const [insuranceCarouselIndex, setInsuranceCarouselIndex] = useState(0)
+  const prototipoVideoRef = useRef<HTMLVideoElement>(null)
   const prefersReducedMotion = useReducedMotion()
   const { scrollYProgress } = useScroll()
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
@@ -366,6 +370,27 @@ export function LandingHomepage({
 
     return undefined
   }, [showSplash])
+
+  useEffect(() => {
+    const video = prototipoVideoRef.current
+    if (!video || prefersReducedMotion || showSplash || typeof IntersectionObserver === 'undefined') {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          void video.play().catch(() => undefined)
+        } else {
+          video.pause()
+        }
+      },
+      { threshold: 0.5 },
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [prefersReducedMotion, showSplash])
 
   return (
     <MotionConfig {...LANDING_MOTION_CONFIG}>
@@ -491,7 +516,6 @@ export function LandingHomepage({
               <div className="absolute inset-0 overflow-hidden">
                 <BackgroundImage src={imagen1} priority />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
-                <div className="bg-grid-pattern absolute inset-0 opacity-20" />
               </div>
 
               <div className="relative z-10 flex min-h-screen items-center justify-center px-4 pb-8 pt-24 sm:pt-28">
@@ -587,7 +611,7 @@ export function LandingHomepage({
               className="relative overflow-hidden bg-slate-50 py-16 sm:py-24"
             >
               <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-                <div className="grid items-end gap-8 lg:grid-cols-[1fr_.8fr]">
+                <div className="max-w-3xl">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -600,21 +624,6 @@ export function LandingHomepage({
                       Jakaru Porá · huertas
                     </h2>
                   </motion.div>
-                  <div className="max-w-xl">
-                    <p className="text-base leading-7 text-slate-600 sm:text-lg">
-                      Una propuesta de Agronautas para acompañar la gestión y el crecimiento de
-                      huertas productivas.
-                    </p>
-                    <a
-                      href="https://www.agronauta.com.ar/jakarú-pora"
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold !text-white transition hover:bg-emerald-700 hover:shadow-lg sm:text-base ${focusRingClass}`}
-                    >
-                      Conocer más
-                      <ArrowRight size={17} />
-                    </a>
-                  </div>
                 </div>
                 <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {platformPillars.map((pillar, index) => (
@@ -636,6 +645,15 @@ export function LandingHomepage({
                         {pillar.title}
                       </h3>
                       <p className="mt-2 text-sm leading-6 text-slate-500">{pillar.desc}</p>
+                      {pillar.href ? (
+                        <a
+                          href={pillar.href}
+                          className={`mt-5 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-800 ${focusRingClass}`}
+                        >
+                          Ir al marketplace
+                          <ArrowRight size={16} />
+                        </a>
+                      ) : null}
                     </motion.article>
                   ))}
                 </div>
@@ -646,6 +664,109 @@ export function LandingHomepage({
                   <ArrowRight className="hidden text-emerald-400 sm:block" size={18} />
                   <span className="text-cyan-300">Mejores oportunidades</span>
                 </div>
+              </div>
+            </section>
+
+            <section className="relative overflow-hidden bg-[#f7f8f3] py-16 sm:py-24" id="jakaru-pora">
+              <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+                <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+                  <motion.div
+                    initial={{ opacity: 0, x: -24 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <span className="inline-block rounded-full bg-[#dfeedd] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#287a70] sm:px-4 sm:py-2 sm:text-sm">
+                      Propuesta de monitoreo
+                    </span>
+                    <h2 className="mt-4 max-w-2xl text-3xl font-black text-[#24372f] sm:text-4xl md:text-5xl">
+                      Jakaru Porá: acompañar la evolución de cada huerta
+                    </h2>
+                    <div className="mt-6 space-y-3 text-sm text-slate-600 sm:text-base">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#609a2a]" />
+                        <span>Consultar mediciones y observaciones de cada huerta.</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#609a2a]" />
+                        <span>Comparar períodos para estudiar cómo evoluciona el registro.</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#609a2a]" />
+                        <span>Explorar una demo con datos simulados, sin atribuir conclusiones.</span>
+                      </div>
+                    </div>
+                    <div className="mt-8 flex flex-wrap gap-3">
+                      <Link
+                        href="/demo"
+                        className={`inline-flex items-center gap-2 rounded-full bg-[#287a70] px-5 py-3 text-sm font-bold !text-white transition hover:bg-[#225e89] hover:shadow-lg sm:text-base ${focusRingClass}`}
+                      >
+                        Explorar la demo
+                        <ArrowRight size={17} />
+                      </Link>
+                      <a
+                        href="https://www.agronauta.com.ar/jakar%C3%BA-pora"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-2 rounded-full border border-[#287a70]/30 px-5 py-3 text-sm font-bold text-[#287a70] transition hover:bg-[#dfeedd] sm:text-base ${focusRingClass}`}
+                      >
+                        Conocer más
+                        <ArrowRight size={17} />
+                      </a>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, x: 24 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="space-y-5"
+                  >
+                    <figure className="overflow-hidden rounded-2xl border border-[#d7e1d4] bg-white shadow-xl sm:rounded-3xl">
+                      <Image
+                        src={prototipoImg1}
+                        alt="Prototipo de dispositivo para el monitoreo de huertas"
+                        width={720}
+                        height={480}
+                        className="aspect-[3/2] w-full object-cover"
+                        loading="lazy"
+                      />
+                      <figcaption className="flex items-center justify-between gap-4 px-4 py-3 text-xs font-medium text-slate-500 sm:px-5 sm:py-4 sm:text-sm">
+                        <span>El dispositivo en contexto</span>
+                        <span className="rounded-full bg-[#dfeedd] px-2.5 py-1 text-[#287a70]">
+                          Prototipo
+                        </span>
+                      </figcaption>
+                    </figure>
+                  </motion.div>
+                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="mx-auto mt-10 max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-2 shadow-2xl sm:mt-14 sm:rounded-3xl sm:p-3"
+                >
+                  <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-1 sm:px-5 sm:pb-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 sm:text-sm">
+                      El prototipo en movimiento
+                    </span>
+                    <span className="text-[11px] text-slate-400">Video</span>
+                  </div>
+                  <video
+                    ref={prototipoVideoRef}
+                    className="aspect-video w-full rounded-xl object-cover sm:rounded-2xl"
+                    controls
+                    muted
+                    playsInline
+                    preload="metadata"
+                    poster={prototipoImg1}
+                  >
+                    <source src={videoPrototipo} type="video/mp4" />
+                    Tu navegador no puede reproducir este video.
+                  </video>
+                  <p className="px-3 pb-1 pt-3 text-xs leading-5 text-slate-300 sm:px-5 sm:text-sm">
+                    Video simulado
+                  </p>
+                </motion.div>
               </div>
             </section>
 
@@ -1139,9 +1260,7 @@ export function LandingHomepage({
                     </p>
                   </motion.div>
                 </div>
-                <div className="relative">
-                  <div className="absolute left-4 h-full w-0.5 bg-gradient-to-b from-emerald-500 via-emerald-400 to-transparent sm:left-8 md:left-1/2 md:-translate-x-1/2" />
-                  <div className="space-y-8 sm:space-y-12">
+                <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
                     {roadmap.map((item, index) => (
                       <motion.div
                         key={item.fase}
@@ -1149,31 +1268,29 @@ export function LandingHomepage({
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: index * 0.1 }}
-                        className={`flex flex-col items-start gap-4 pl-10 sm:gap-8 sm:pl-14 md:pl-0 ${index % 2 === 0 ? 'md:flex-row md:items-center' : 'md:flex-row-reverse md:items-center'}`}
+                        className="group relative flex min-h-52 items-start gap-5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl sm:p-8 lg:last:col-span-2 lg:last:mx-auto lg:last:w-1/2"
                       >
                         <div
-                          className={`flex-1 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}
+                          className={`relative z-10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl shadow-lg ${item.bgColor}`}
                         >
+                          <item.icon size={24} className="text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1 pt-0.5">
                           <div
-                            className={`mb-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${item.badgeBg} ${item.badgeText}`}
+                            className={`mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${item.badgeBg} ${item.badgeText}`}
                           >
                             {item.fase}
                           </div>
-                          <h3 className="text-lg font-bold text-slate-800 sm:text-xl md:text-2xl">
+                          <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
                             {item.title}
                           </h3>
-                          <p className="mt-1 text-sm text-slate-500 sm:text-base">{item.desc}</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
+                            {item.desc}
+                          </p>
                         </div>
-                        <div className="relative z-10 flex-shrink-0">
-                          <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-full shadow-lg sm:h-12 sm:w-12 ${item.bgColor}`}
-                          >
-                            <item.icon size={18} className="text-white" />
-                          </div>
-                        </div>
+                        <div className="pointer-events-none absolute -bottom-8 -right-8 h-28 w-28 rounded-full bg-emerald-50 transition-transform duration-300 group-hover:scale-125" />
                       </motion.div>
                     ))}
-                  </div>
                 </div>
               </div>
             </section>
@@ -1195,6 +1312,31 @@ export function LandingHomepage({
                     Inteligencia Productiva para Corrientes, Argentina
                   </p>
                 </div>
+                <nav
+                  aria-label="Enlaces del sitio"
+                  className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 border-t border-slate-800 pt-6 text-sm text-slate-300 sm:gap-x-8"
+                >
+                  <a href="#jakaru-pora" className={`transition hover:text-emerald-300 ${focusRingClass}`}>
+                    Jakaru Porá
+                  </a>
+                  <a href="/demo" className={`transition hover:text-emerald-300 ${focusRingClass}`}>
+                    Explorar la demo
+                  </a>
+                  <a
+                    href="/demo?view=marketplace"
+                    className={`transition hover:text-emerald-300 ${focusRingClass}`}
+                  >
+                    Marketplace B2B
+                  </a>
+                  <a
+                    href="https://www.instagram.com/agronautas.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`transition hover:text-emerald-300 ${focusRingClass}`}
+                  >
+                    Instagram
+                  </a>
+                </nav>
                 <div className="mt-8 border-t border-slate-800 pt-6 text-center text-xs text-slate-500 sm:mt-12 sm:pt-8 sm:text-sm">
                   © 2026 Agronautas - Especialistas en Corrientes
                 </div>

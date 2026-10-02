@@ -70,10 +70,10 @@ export function CopilotStatus({ outcome, citationUnavailable, actionable, reason
 
   return (
     <div role={isActionable ? 'status' : 'alert'} aria-live={isActionable ? 'polite' : 'assertive'} aria-atomic="true" className={`rounded-2xl border p-4 text-sm ${toneClass}`}>
-      <strong>{isActionable ? 'Copilot fundamentado' : 'Citación no disponible'}</strong>
+      <strong>{isActionable ? 'AsesorIA conectada' : 'Citación no disponible'}</strong>
       <span className="ml-2">{isActionable ? `Estado: ${outcome}` : 'Resultado no es accionable.'}</span>
       {reason ? <p className="mt-1">{reason}</p> : null}
-      {retryAfterSeconds ? <p className="mt-1">Reintentar Copilot en {retryAfterSeconds} segundos.</p> : null}
+      {retryAfterSeconds ? <p className="mt-1">Reintentar AsesorIA en {retryAfterSeconds} segundos.</p> : null}
       {onRetry ? <button className="mt-3 rounded-full border border-stone-400 px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={onRetry} disabled={Boolean(retryAfterSeconds)}>{'Reintentar Copilot'}</button> : null}
     </div>
   )

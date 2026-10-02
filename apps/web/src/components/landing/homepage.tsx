@@ -667,6 +667,103 @@ export function LandingHomepage({
               </div>
             </section>
 
+            <section className="relative overflow-hidden bg-slate-950 py-16 text-white sm:py-24" id="marketplace">
+              <div className="absolute inset-0 opacity-35">
+                <Image
+                  src="/marketplace/marketplace-hero.jpg"
+                  alt="Campo agrícola al atardecer"
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/45" />
+              <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6">
+                <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_.9fr] lg:gap-20">
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <span className="inline-block rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 sm:px-4 sm:py-2 sm:text-sm">
+                      Agronauta Marketplace
+                    </span>
+                    <h2 className="mt-5 max-w-3xl text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl">
+                      La evolución de los agronegocios digitales
+                    </h2>
+                    <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">
+                      Un ecosistema transaccional pensado para productores, acopiadores y empresas
+                      que comercializan hacienda, granos y maquinaria.
+                    </p>
+                    <Link
+                      href="/login"
+                      className={`mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold !text-slate-950 transition hover:bg-emerald-400 hover:shadow-xl sm:text-base ${focusRingClass}`}
+                    >
+                      Registrate
+                      <ArrowRight size={17} />
+                    </Link>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 24 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="hidden overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-2xl backdrop-blur-sm sm:block"
+                  >
+                    <Image
+                      src="/marketplace/vaquillonas.png"
+                      alt="Oferta ganadera dentro del marketplace agropecuario"
+                      width={720}
+                      height={480}
+                      className="aspect-[3/2] w-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="flex items-center justify-between gap-4 px-5 py-4">
+                      <span className="text-sm font-semibold text-white">Hacienda, granos y maquinaria</span>
+                      <span className="text-xs text-emerald-300">Oferta especializada</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-white py-14 sm:py-20">
+              <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { icon: Database, title: 'Fichas técnicas inteligentes', text: 'La información se adapta al producto: raza, categoría y peso para hacienda; humedad, zaranda y cultivo para granos.' },
+                    { icon: LineChart, title: 'Simulador financiero', text: 'Proyectá el costo total con canje cereal, cheques de pago diferido y tarjetas rurales.' },
+                    { icon: ArrowRight, title: 'Negociación digital', text: 'Enviá consultas y contraofertas en USD, con el volumen y el valor total del negocio visibles.' },
+                    { icon: Map, title: 'Búsqueda georreferenciada', text: 'Encontrá oportunidades por categoría y ubicación, desde lotes de maíz hasta maquinaria.' },
+                  ].map((item, index) => (
+                    <motion.article
+                      key={item.title}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.08 }}
+                      className="border-t-2 border-emerald-500 bg-slate-50 p-5 sm:p-6"
+                    >
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                        <item.icon size={21} />
+                      </div>
+                      <h3 className="mt-6 text-lg font-bold text-slate-900">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+                    </motion.article>
+                  ))}
+                </div>
+                <div className="mt-10 flex flex-col items-start justify-between gap-5 border-t border-slate-200 pt-7 sm:flex-row sm:items-center">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-wider text-emerald-700">Panel comercial integrado</p>
+                    <p className="mt-1 text-sm text-slate-500">Catálogo global, publicaciones activas y consultas recibidas en un mismo lugar.</p>
+                  </div>
+                  <Link href="/login" className={`inline-flex items-center gap-2 rounded-full border border-emerald-700 px-5 py-2.5 text-sm font-bold text-emerald-700 transition hover:bg-emerald-50 ${focusRingClass}`}>
+                    Registrate
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
+            </section>
+
             <section className="relative overflow-hidden bg-[#f7f8f3] py-16 sm:py-24" id="jakaru-pora">
               <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
                 <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
@@ -696,17 +793,8 @@ export function LandingHomepage({
                       </div>
                     </div>
                     <div className="mt-8 flex flex-wrap gap-3">
-                      <Link
-                        href="/demo"
-                        className={`inline-flex items-center gap-2 rounded-full bg-[#287a70] px-5 py-3 text-sm font-bold !text-white transition hover:bg-[#225e89] hover:shadow-lg sm:text-base ${focusRingClass}`}
-                      >
-                        Explorar la demo
-                        <ArrowRight size={17} />
-                      </Link>
                       <a
-                        href="https://www.agronauta.com.ar/jakar%C3%BA-pora"
-                        target="_blank"
-                        rel="noreferrer"
+                        href="/jakaru"
                         className={`inline-flex items-center gap-2 rounded-full border border-[#287a70]/30 px-5 py-3 text-sm font-bold text-[#287a70] transition hover:bg-[#dfeedd] sm:text-base ${focusRingClass}`}
                       >
                         Conocer más
